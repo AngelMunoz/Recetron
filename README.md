@@ -5,6 +5,8 @@
 [MongoDB]: https://mongodb.github.io/mongo-csharp-driver/
 [MongoDB Atlas]: https://www.mongodb.com/cloud/atlas
 [Bolero]: https://fsbolero.io/
+[Heroku]: https://elements.heroku.com/buildpacks/jincod/dotnetcore-buildpack
+[Firebase]: https://firebase.google.com/docs/hosting/
 
 This is a simple playground with a "full-stack" C# web application using [Blazor], [Carter] (asp.net) and [MongoDB] (because I might try to migrate from a JS job to a .net job and blazor seems an easy path for that)
 
