@@ -1,0 +1,78 @@
+﻿:root {
+    --main-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    --main-background-image: linear-gradient(-225deg, #CBBACC 0%, #2580B3 100%);
+    --element-background: rgba(180, 180, 180, 0.3);
+    --element-background-light: rgba(255, 255, 255, 0.30);
+    --element-background-dark: rgba(0, 0, 0, 0.45);
+    --element-background-success: rgba(0, 255, 85, 0.45);
+    --element-background-error: rgba(255, 0, 0, 0.45);
+    --element-background-info: rgba(0, 204, 255, 0.15);
+}
+
+
+html, body {
+    margin: 0;
+    padding: 0;
+    font-family: var(--main-font);
+    height: 100%;
+    background-image: var(--main-background-image, linear-gradient(-225deg, #CBBACC 0%, #2580B3 100%));
+}
+
+.recbg-default {
+    background-color: var(--element-background, rgba(255, 255, 255, 0.30));
+}
+
+.recbg-light {
+    background-color: var(--element-background-light, rgba(255, 255, 255, 0.45));
+}
+
+.recbg-dark {
+    background-color: var(--element-background-dark, rgba(0, 0, 0, 0.3));
+}
+
+.recbg-success {
+    background-color: var(--element-background-success, --element-background);
+}
+
+.recbg-error {
+    background-color: var(--element-background-error, --element-background);
+}
+
+.recbg-info {
+    background-color: var(--element-background-info, --element-background);
+}
+
+.rec-content {
+    height: 100vh;
+    background-color: var(--element-background, rgba(255, 255, 255, 0.30));
+}
+
+.rec-main {
+    height: 86vh;
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+}
+
+.rec-home-hero {
+    margin: auto 1em;
+    border-radius: 12px;
+}
+
+.rec-footer {
+    height: 12vh;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    flex: 1 2 auto;
+}
+
+.rec-auth {
+  display: flex;
+  flex-direction: column;
+  margin: auto;
+  width: auto;
+  min-width: 320px;
+  height: auto;
+  padding: 2em;
+}

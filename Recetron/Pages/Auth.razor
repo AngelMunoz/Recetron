@@ -1,0 +1,136 @@
+﻿@page "/auth"
+@using Recetron.Core.Models
+@using Recetron.Interfaces
+@inject IAuthService AuthService
+@inject NavigationManager Nav
+
+
+
+<section class="rec-auth recbg-light">
+  <h1 class="text-center">Auth Page</h1>
+  <ul class="tab tab-block" >
+    <li class="tab-item @(@IsActive("login") ? "active" : "")">
+      <a @onclick="@(_ => @SetActiveTab("login"))">Login</a>
+    </li>
+    <li class="tab-item @(@IsActive("signup") ? "active" : "")">
+      <a @onclick="@(_ => @SetActiveTab("signup"))">Signup</a>
+    </li>
+  </ul>
+
+  @if(@ActiveTab == "login") {
+    <EditForm Model="@loginPayload" OnValidSubmit="SubmitLogin">
+      <DataAnnotationsValidator />
+      <ValidationSummary />
+      <section class="form-group">
+        <label for="email" class="form-label">Email</label>
+        <InputText class="form-input" type="email" @bind-Value="loginPayload.Email" placeholder="Email" />
+      </section>
+      <section class="form-group">
+        <label for="password" class="form-label">Password</label>
+        <InputText type="password" class="form-input"  @bind-Value="loginPayload.Password" placeholder="Password" />
+      </section>
+      <section class="form-group">
+        <button class="btn">Send</button>
+      </section>
+    </EditForm>
+  } else {
+    <EditForm Model="@signUpPayload" OnValidSubmit="SubmitSignUp">
+      <DataAnnotationsValidator />
+      <ValidationSummary />
+      @if(passwordError != null) {
+        <ul class="validation-errors">
+          <li class="validation-message">Passwords do not match</li>
+        </ul>
+      }
+      <section class="form-group">
+        <label for="name" class="form-label">Name</label>
+        <InputText class="form-input" @bind-Value="signUpPayload.Name" placeholder="Name" />
+      </section>
+      <section class="form-group">
+        <label for="LastName" class="form-label">Last Name</label>
+        <InputText class="form-input" @bind-Value="signUpPayload.LastName" placeholder="Last Name" />
+      </section>
+      <section class="form-group">
+        <label for="email" class="form-label">Email</label>
+        <InputText type="email" class="form-input" @bind-Value="signUpPayload.Email" placeholder="Email" />
+      </section>
+      <section class="form-group">
+        <label for="password" class="form-label">Password</label>
+        <InputText type="password" class="form-input"  @bind-Value="signUpPayload.Password" placeholder="Password" />
+      </section>
+      <section class="form-group">
+        <label for="repeatPassword" class="form-label">Repeat Password</label>
+        <InputText type="password" name="repeatPassword" class="form-input"  @bind-Value="@repeatPassword" placeholder="Password" />
+      </section>
+      <section class="form-group">
+        <button class="btn">Send</button>
+      </section>
+    </EditForm>
+  }
+</section>
+
+@code {
+
+  public string ActiveTab { get; private set; } = "signup";
+
+  private string repeatPassword { get; set; } = "";
+
+  private LoginPayload loginPayload = new LoginPayload { Email = "", Password = "" };
+
+  private SignUpPayload signUpPayload = new SignUpPayload { Email = "", Password = "", LastName = "", Name = "" };
+
+  private string? passwordError;
+
+  private async void SubmitLogin()
+  {
+    try
+    {
+      await AuthService.LoginAsync(loginPayload);
+    }
+    catch (System.Exception e)
+    {
+      Console.Error.WriteLine($"Failed to Login: {e.Message} - {e.StackTrace}");
+    }
+  }
+
+  private async void SubmitSignUp()
+  {
+    if (signUpPayload.Password != repeatPassword)
+    {
+      Console.Error.WriteLine($"Passwords don't match");
+      passwordError = "Passwords don't match";
+      return;
+    }
+    else
+    {
+      passwordError = null;
+    }
+    try
+    {
+      await AuthService.SignupAsync(signUpPayload);
+    }
+    catch (System.Exception e)
+    {
+      Console.Error.WriteLine($"Failed to Login: {e.Message} - {e.StackTrace}");
+    }
+  }
+
+  private void SetActiveTab(string name)
+  {
+    ActiveTab = name;
+  }
+
+  private bool IsActive(string name)
+  {
+    return ActiveTab == name;
+  }
+
+  protected override void OnInitialized()
+  {
+    if (AuthService.IsAuthenticated)
+    {
+      Nav.NavigateTo("/counter");
+      return;
+    }
+  }
+}

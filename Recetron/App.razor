@@ -1,0 +1,53 @@
+﻿
+@using Recetron.Interfaces
+@inject IAuthService Auth
+@inject NavigationManager Nav
+
+<Router AppAssembly="@typeof(Program).Assembly">
+    <Found Context="routeData">
+        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+    </Found>
+    <NotFound>
+        <LayoutView Layout="@typeof(MainLayout)">
+            <p>Sorry, there's nothing at this address.</p>
+        </LayoutView>
+    </NotFound>
+</Router>
+
+
+@code {
+
+
+  protected override void OnInitialized()
+  {
+    Auth.AuthStateChanged += OnAuthStateChanged;
+    if (Auth.IsAuthenticated)
+    {
+      Nav.NavigateTo("/counter");
+      return;
+    }
+    else
+    {
+      Nav.NavigateTo("/auth");
+    }
+  }
+
+  private void OnAuthStateChanged(object sender, bool isAuthenticated)
+  {
+    if (isAuthenticated)
+    {
+      Nav.NavigateTo("/counter", true);
+      return;
+    }
+    else
+    {
+      Nav.NavigateTo("/auth");
+    }
+  }
+
+
+  public void Dispose()
+  {
+    Auth.AuthStateChanged -= OnAuthStateChanged;
+  }
+}
