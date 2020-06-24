@@ -44,6 +44,10 @@ Well... I still like better Javascript for web applications, there's just so muc
 You don't always need IoC and DI and blazor kind of forces you to use DI and create services to compensate the lack of better browser event integration.
 The razor syntax is clunky I'd rather have less disrupting markup and code like Aurelia's `if.bind="exp"` or `repeat.for="item of items"` instead using tons of lines for ifs and control structures.
 
+Form validation is quite nice actually I like that a lot it simplifies a lot of things I believe by just adding annotations
+
+Also not having direct contact with JS comes with other benefits, it forces you to have less dependencies for minimal things like a CSS framework with it's own JS included, or a library for datetime conversions or string formatting which may not seem much but once you realize you have dependencies you might have too much of them already
+
 Beyond that, I think Blazor might be a good thing though I'd favor the [Bolero] flavor
 
 Carter on the backend, seems to simplify a lot of the boilerplate and code that comes from default asp.net controllers and supports open API (though I won't use it on this project) I believe it has a lighter feeling similar to [Express] which is a good thing in my opinion, I don't like to "over-pattern" stuff just for the sake of "Big corp says I must do it that way so I will do it that way" as long as the code is maintainable I will like it and if anything goes awry this is ASP under the hood so I can fallback to "Big Corp Patterns"
