@@ -18,7 +18,7 @@ namespace Recetron.Api
 
 
         var (canLogin, user) = await _auth.VerifyUserLoginAsync(payload);
-        if (canLogin)
+        if (canLogin && user != null)
         {
           var token = _auth.SignJwtToken(user!);
           await res.Negotiate(new AuthResponse() { Token = token, User = user });

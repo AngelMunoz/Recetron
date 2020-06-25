@@ -45,7 +45,7 @@ namespace Recetron.Api.Services
         Email = firstuser.Email,
         LastName = firstuser.LastName,
         Name = firstuser.Name,
-        Id = firstuser.Id.ToString()
+        Id = firstuser.Id
       };
     }
 
@@ -87,7 +87,7 @@ namespace Recetron.Api.Services
                     new Claim(ClaimTypes.NameIdentifier, user.Name?.ToString())
           }
         ),
-        Expires = DateTime.UtcNow.AddMinutes(1),
+        Expires = DateTime.UtcNow.AddDays(1),
         SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
       };
       var token = tokenHandler.CreateToken(tokenDescriptor);
@@ -106,7 +106,7 @@ namespace Recetron.Api.Services
           Email = user.Email,
           LastName = user.LastName,
           Name = user.Name,
-          Id = user.Id.ToString()
+          Id = user.Id
         }
       );
     }
@@ -140,7 +140,7 @@ namespace Recetron.Api.Services
               Email = res.Result.Email,
               LastName = res.Result.LastName,
               Name = res.Result.Name,
-              Id = res.Result.Id.ToString()
+              Id = res.Result.Id
             };
           });
       }

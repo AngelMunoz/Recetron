@@ -12,13 +12,14 @@ using Recetron.Core.Models;
 
 namespace Recetron.Api
 {
-  public static class ModuleHookHelpers
+  public static class ModuleHelpers
   {
     public static string? ExtractTokenStr(HttpContext ctx)
     {
       ctx.Request.Headers.TryGetValue("Authorization", out StringValues values);
       return values.FirstOrDefault()?.Split(" ").Skip(1).FirstOrDefault();
     }
+
     public static Func<HttpContext, IAuthService, Task<bool>> VerifyJwt = (ctx, auth) =>
      {
        var token = ExtractTokenStr(ctx);
@@ -38,7 +39,7 @@ namespace Recetron.Api
 
     public static (int page, int limit) GetPagination(string? page, string? limit)
     {
-      var p = int.Parse(page ?? "0");
+      var p = int.Parse(page ?? "1");
       var l = int.Parse(limit ?? "10");
       return (p, l);
     }

@@ -79,7 +79,7 @@ namespace Recetron.Services
       }
       catch (System.Exception e)
       {
-        Console.Error.WriteLine(e.Message);
+        Console.Error.WriteLine($"Error at signup {e.Message} - {e.StackTrace}");
         return false;
       }
       return true;

@@ -17,10 +17,10 @@ namespace Recetron.Api
   {
     public RecipeModule(IAuthService _auth, IRecipeService _recipes) : base("/api/recipes")
     {
-      this.Before = ctx => ModuleHookHelpers.VerifyJwt(ctx, _auth);
+      this.Before = ctx => ModuleHelpers.VerifyJwt(ctx, _auth);
       Get("", async (req, res) =>
       {
-        var user = await _auth.ExtractUserAsync(ModuleHookHelpers.ExtractTokenStr(req.HttpContext));
+        var user = await _auth.ExtractUserAsync(ModuleHelpers.ExtractTokenStr(req.HttpContext));
         if (user == null)
         {
           res.StatusCode = 422;
@@ -29,10 +29,28 @@ namespace Recetron.Api
         }
         var _page = req.Query.FirstOrDefault(f => f.Key == "page").Value.FirstOrDefault();
         var _limit = req.Query.FirstOrDefault(f => f.Key == "limit").Value.FirstOrDefault();
-        var (page, limit) = ModuleHookHelpers.GetPagination(_page, _limit);
-        var recipes = await _recipes.Find(page, limit, recipe => recipe.UserId == ObjectId.Parse(user.Id));
+        var (page, limit) = ModuleHelpers.GetPagination(_page, _limit);
+        var recipes = await _recipes.Find(page, limit, recipe => recipe.UserId == user.Id);
         await res.Negotiate(recipes);
         return;
+      });
+
+      Post("", async (req, res) =>
+      {
+        var user = await _auth.ExtractUserAsync(ModuleHelpers.ExtractTokenStr(req.HttpContext));
+        if (user == null || user.Id == null)
+        {
+          res.StatusCode = 422;
+          await res.Negotiate(new ErrorResponse { Message = "Missing User from Token" });
+          return;
+        }
+
+        Recipe payload = await req.Bind<Recipe>();
+        payload.UserId = user.Id;
+        var recipe = await _recipes.Create(payload);
+
+        res.StatusCode = 201;
+        await res.Negotiate(recipe);
       });
     }
   }

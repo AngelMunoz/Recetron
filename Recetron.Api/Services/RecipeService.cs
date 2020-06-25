@@ -35,7 +35,7 @@ namespace Recetron.Api.Services
 
     public Task<PaginationResult<Recipe>> Find(int page, int limit, Expression<Func<Recipe, bool>>? where = default, CancellationToken ct = default)
     {
-      var offset = page * (limit - 1);
+      var offset = limit * (page - 1);
 
       if (where != null)
       {
