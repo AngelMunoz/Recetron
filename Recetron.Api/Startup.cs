@@ -2,6 +2,7 @@ namespace Recetron.Api
 {
   using System;
   using System.Diagnostics;
+  using System.Security.Claims;
   using System.Text;
   using Carter;
   using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -24,15 +25,15 @@ namespace Recetron.Api
     public void ConfigureServices(IServiceCollection services)
     {
       services.AddCors();
+      ConfigureJWT(services);
+      services
+        .AddScoped<IEnvVarService, EnvVarService>()
+        .AddSingleton<IDBService, DBService>()
+        .AddScoped<IAuthService, AuthService>()
+        .AddScoped<IRecipeService, RecipeService>();
 
       services
         .AddCarter();
-      services
-        .AddSingleton<IDBService, DBService>()
-        .AddScoped<IAuthService, AuthService>()
-        .AddScoped<IEnvVarService, EnvVarService>();
-
-      ConfigureJWT(services);
     }
 
     private void ConfigureJWT(IServiceCollection services)
@@ -40,11 +41,7 @@ namespace Recetron.Api
       var jwtkey = Environment.GetEnvironmentVariable("JWT_KEY") ?? "Some super secret key";
       var key = Encoding.UTF8.GetBytes(jwtkey);
       services
-        .AddAuthentication(ac =>
-        {
-          ac.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-          ac.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-        })
+        .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         .AddJwtBearer(jwt =>
         {
           jwt.RequireHttpsMetadata = false;
@@ -66,11 +63,10 @@ namespace Recetron.Api
         app.UseCors(o => o.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
       }
 
-      app
-        .UseRouting()
-        .UseEndpoints(builder => builder.MapCarter());
-
+      app.UseRouting();
       app.UseAuthentication();
+      app.UseEndpoints(builder => builder.MapCarter());
+
     }
   }
 }
