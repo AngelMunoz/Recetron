@@ -30,10 +30,22 @@ namespace Recetron.Api
 
       Post("signup", async (req, res) =>
       {
-        var payload = await req.Bind<SignUpPayload>();
+        var result = await req.BindAndValidate<SignUpPayload>();
+        if (!result.ValidationResult.IsValid)
+        {
+          res.StatusCode = 400;
+          await res.Negotiate(
+            new ErrorResponse
+            {
+              Message = "Failed Validation",
+              Errors = result.ValidationResult.GetFormattedErrors()
+            }
+          );
+          return;
+        }
         try
         {
-          var user = await _auth.SignupUserAsync(payload);
+          var user = await _auth.SignupUserAsync(result.Data);
           if (user == null)
           {
             res.StatusCode = 500;

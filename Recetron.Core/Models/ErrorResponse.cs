@@ -6,5 +6,6 @@ namespace Recetron.Core.Models
   {
     public string? Message { get; set; }
     public int? Code { get; set; }
+    public IEnumerable<dynamic> Errors { get; set; } = new dynamic[] { };
   }
 }
