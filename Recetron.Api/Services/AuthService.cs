@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -10,6 +11,7 @@ using Recetron.Api.Interfaces;
 using Recetron.Api.Models;
 using Recetron.Core.Models;
 using BCryptNet = BCrypt.Net.BCrypt;
+using MongoDB.Bson;
 
 namespace Recetron.Api.Services
 {
@@ -68,6 +70,7 @@ namespace Recetron.Api.Services
       catch (ArgumentNullException) { return false; }
       catch (ArgumentException) { return false; }
       catch (SecurityTokenEncryptionFailedException) { return false; }
+      catch (SecurityTokenExpiredException) { return false; }
     }
 
     public string SignJwtToken(UserDTO user)
@@ -106,6 +109,45 @@ namespace Recetron.Api.Services
           Id = user.Id.ToString()
         }
       );
+    }
+
+    public Task<UserDTO?> ExtractUserAsync(string? token)
+    {
+      if (token == null) { return Task.FromResult<UserDTO?>(null); }
+
+      var tokenhandler = new JwtSecurityTokenHandler();
+      var key = Encoding.UTF8.GetBytes(_envvars.GetJwtSecret());
+      var parameters = new TokenValidationParameters
+      {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(key),
+        ValidateIssuer = false,
+        ValidateAudience = false
+      };
+      try
+      {
+        tokenhandler.ValidateToken(token, parameters, out SecurityToken validated);
+        var tk = tokenhandler.ReadJwtToken(token);
+        var nameClaim = tk.Payload.Claims.FirstOrDefault(claim => claim.Type == "unique_name");
+        return _users
+          .Find(user => user.Id == ObjectId.Parse(nameClaim.Value))
+          .FirstOrDefaultAsync()
+          .ContinueWith(res =>
+          {
+            if (res.Result == null) { return null; };
+            return new UserDTO
+            {
+              Email = res.Result.Email,
+              LastName = res.Result.LastName,
+              Name = res.Result.Name,
+              Id = res.Result.Id.ToString()
+            };
+          });
+      }
+      catch (ArgumentNullException) { return Task.FromResult<UserDTO?>(null); }
+      catch (ArgumentException) { return Task.FromResult<UserDTO?>(null); }
+      catch (SecurityTokenEncryptionFailedException) { return Task.FromResult<UserDTO?>(null); }
+      catch (SecurityTokenExpiredException) { return Task.FromResult<UserDTO?>(null); }
     }
   }
 }

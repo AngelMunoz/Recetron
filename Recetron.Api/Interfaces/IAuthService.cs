@@ -11,6 +11,7 @@ namespace Recetron.Api.Interfaces
     bool VerifyJWT(string token);
     string SignJwtToken(UserDTO user);
 
+    Task<UserDTO?> ExtractUserAsync(string? token);
     Task<UserDTO> SignupUserAsync(SignUpPayload payload, CancellationToken ct = default);
     Task<(bool, UserDTO?)> VerifyUserLoginAsync(LoginPayload payload, CancellationToken ct = default);
 

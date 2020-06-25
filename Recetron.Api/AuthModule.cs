@@ -10,10 +10,9 @@ namespace Recetron.Api
 
   public class AuthModule : CarterModule
   {
-    private readonly string baseurl = "auth";
-    public AuthModule(IAuthService _auth)
+    public AuthModule(IAuthService _auth) : base("/auth/")
     {
-      Post($"{baseurl}/login", async (req, res) =>
+      Post("login", async (req, res) =>
       {
         var payload = await req.Bind<LoginPayload>();
 
@@ -29,7 +28,7 @@ namespace Recetron.Api
         await res.Negotiate(new ErrorResponse { Message = "Credentials Not Valid" });
       });
 
-      Post($"{baseurl}/signup", async (req, res) =>
+      Post("signup", async (req, res) =>
       {
         var payload = await req.Bind<SignUpPayload>();
         try
