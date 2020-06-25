@@ -1,5 +1,4 @@
-﻿
-@using Recetron.Interfaces
+﻿@using Recetron.Interfaces
 @inject IAuthService Auth
 @inject NavigationManager Nav
 
@@ -23,12 +22,12 @@
     Auth.AuthStateChanged += OnAuthStateChanged;
     if (Auth.IsAuthenticated)
     {
-      Nav.NavigateTo("/counter");
+      Nav.NavigateTo(Constants.RECIPES_URL);
       return;
     }
     else
     {
-      Nav.NavigateTo("/auth");
+      Nav.NavigateTo(Constants.AUTH_URL);
     }
   }
 
@@ -36,12 +35,12 @@
   {
     if (isAuthenticated)
     {
-      Nav.NavigateTo("/counter", true);
+      Nav.NavigateTo(Constants.RECIPES_URL, true);
       return;
     }
     else
     {
-      Nav.NavigateTo("/auth");
+      Nav.NavigateTo(Constants.AUTH_URL);
     }
   }
 

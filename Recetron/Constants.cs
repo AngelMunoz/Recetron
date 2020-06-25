@@ -19,6 +19,12 @@ namespace Recetron
     public static readonly string ACCESS_TOKEN_NAME = "access_token";
 
     public static readonly string USER_DATA_NAME = "user_data";
+
+    public static readonly string AUTH_URL = "/auth";
+
+    public static readonly string RECIPES_URL = "/recipes";
+
+    public static readonly string NOTES_URL = "/notes";
   }
 
 }

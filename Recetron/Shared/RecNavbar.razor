@@ -6,7 +6,8 @@
   <section class="navbar-section">
       @* Future use  *@
       @if (Auth.IsAuthenticated) {
-        <NavLink class="btn btn-link" href="counter">Counter</NavLink>
+        <NavLink class="btn btn-link" href="/recipes">Recipes</NavLink>
+        <NavLink class="btn btn-link" href="/notes">Notes</NavLink>
       }
   </section>
   <section class="navbar-center">
@@ -20,7 +21,6 @@
     }
   </section>
 </header>
-
 @code {
   private async void SignOut(MouseEventArgs args)
   {
