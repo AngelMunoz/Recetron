@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http;
 using Blazored.LocalStorage;
+using Recetron.Core.Interfaces;
 using Recetron.Interfaces;
 using Recetron.Services;
 
@@ -21,20 +22,23 @@ namespace Recetron
       await builder.Build().RunAsync();
     }
 
-    public static void ConfigureServices(IServiceCollection services, WebAssemblyHostConfiguration config)
+    private static void ConfigureServices(IServiceCollection services, WebAssemblyHostConfiguration config)
     {
       var baseApiUrl = config.GetSection("apiUrl")?.Value;
       services
         .AddBlazoredLocalStorage()
         .AddScoped<IAuthService, AuthService>()
+        .AddScoped<IRecipeService, RecipeService>()
         .AddHttpClient(Constants.AUTH_CLIENT_NAME, client => client.BaseAddress = new Uri($"{baseApiUrl}/auth"));
 
       services.AddHttpClient(Constants.API_CLIENT_NAME, (sp, client) =>
         {
           client.BaseAddress = new Uri($"{baseApiUrl}/api");
-          var auth = sp.GetService<IAuthService>();
-          var token = auth.Token;
-          if (token is null) { return; }
+          var sfactory = sp.GetService<IServiceScopeFactory>();
+          using var scope = sfactory.CreateScope();
+          var auth = scope.ServiceProvider.GetService<IAuthService>();
+          var token = auth?.Token;
+          if (token == null) { return; }
           client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
         });
     }
