@@ -10,7 +10,7 @@ namespace Recetron.Core.Interfaces
 {
   public interface ICrudable<T>
   {
-    Task<PaginationResult<T>> Find(int page, int limit, Expression<Func<T, bool>>? where = default, CancellationToken ct = default);
+    Task<PaginationResult<T>> Find(int page, int limit, CancellationToken ct = default);
 
     Task<T> FindOne(ObjectId id, CancellationToken ct = default);
 

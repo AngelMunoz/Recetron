@@ -33,18 +33,20 @@ namespace Recetron.Api.Services
         .ContinueWith(res => res.Result.DeletedCount == 1);
     }
 
-    public Task<PaginationResult<Recipe>> Find(int page, int limit, Expression<Func<Recipe, bool>>? where = default, CancellationToken ct = default)
+    public Task<PaginationResult<Recipe>> Find(int page, int limit, CancellationToken ct = default)
     {
       var offset = limit * (page - 1);
-
-      if (where != null)
-      {
-        var whereCount = _recipes.CountDocumentsAsync(where, cancellationToken: ct);
-        var whereList = _recipes.Find(where).Limit(limit).Skip(offset).ToEnumerable(ct);
-        return whereCount.ContinueWith(res => new PaginationResult<Recipe> { Count = res.Result, List = whereList });
-      }
       var count = _recipes.CountDocumentsAsync(FilterDefinition<Recipe>.Empty, cancellationToken: ct);
       var list = _recipes.Find(FilterDefinition<Recipe>.Empty).Limit(limit).Skip(offset).ToEnumerable(ct);
+      return count.ContinueWith(res => new PaginationResult<Recipe> { Count = res.Result, List = list });
+    }
+
+    public Task<PaginationResult<Recipe>> FindByUser(ObjectId userId, int page, int limit, CancellationToken ct = default)
+    {
+      var offset = limit * (page - 1);
+      var filter = new FilterDefinitionBuilder<Recipe>().Where(recipe => recipe.UserId == userId);
+      var count = _recipes.CountDocumentsAsync(filter, cancellationToken: ct);
+      var list = _recipes.Find(filter).Limit(limit).Skip(offset).ToEnumerable(ct);
       return count.ContinueWith(res => new PaginationResult<Recipe> { Count = res.Result, List = list });
     }
 
