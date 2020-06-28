@@ -1,16 +1,47 @@
 @page "/recipes"
+@using Recetron.Core.Models
+@using System.Threading
+@using Recetron.Core.Interfaces
+@inject IRecipeService RecipeService
+<article class="rec-page">
+  @foreach (var recipe in recipes.List)
+  {
+    <div class="tile">
+      <div class="tile-icon">
+        <div class="example-tile-icon">
+          <i class="icon icon-file centered"></i>
+        </div>
+      </div>
+      <div class="tile-content">
+        <p class="tile-title">@recipe.Title</p>
+        <p class="tile-subtitle">@recipe.Description</p>
+      </div>
+      <div class="tile-action">
+        <button class="btn btn-primary">Check Recipe</button>
+      </div>
+    </div>
+  }
+</article>
 
-<h1>Counter</h1>
-
-<p>Current count: @currentCount</p>
-
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
 
 @code {
-  private int currentCount = 0;
+  private int Page { get; set; } = 1;
+  private int Limit { get; set; } = 10;
+  private readonly CancellationTokenSource _cts = new CancellationTokenSource();
+  private PaginationResult<Recipe> recipes { get; set; } = new PaginationResult<Recipe>();
 
-  private void IncrementCount()
+  protected override async Task OnInitializedAsync()
   {
-    currentCount++;
+    var result = await RecipeService.Find(Page, Limit, _cts.Token);
+    recipes = result;
   }
+
+  public void Dispose()
+  {
+    _cts.Cancel();
+    _cts.Dispose();
+  }
+
+
+
 }
