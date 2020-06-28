@@ -31,15 +31,15 @@ html, body {
 }
 
 .recbg-success {
-    background-color: var(--element-background-success, --element-background);
+    background-color: var(--element-background-success, var(--element-background));
 }
 
 .recbg-error {
-    background-color: var(--element-background-error, --element-background);
+    background-color: var(--element-background-error, var(--element-background));
 }
 
 .recbg-info {
-    background-color: var(--element-background-info, --element-background);
+    background-color: var(--element-background-info, var(--element-background));
 }
 
 .rec-content {
@@ -67,6 +67,11 @@ html, body {
     flex: 1 2 auto;
 }
 
+.rec-page {
+  padding: 2em;
+  margin: 0.5em;
+}
+
 .rec-auth {
   display: flex;
   flex-direction: column;
@@ -74,5 +79,4 @@ html, body {
   width: auto;
   min-width: 320px;
   height: auto;
-  padding: 2em;
 }
