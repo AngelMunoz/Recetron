@@ -30,7 +30,7 @@ namespace Recetron.Api
         var _page = req.Query.FirstOrDefault(f => f.Key == "page").Value.FirstOrDefault();
         var _limit = req.Query.FirstOrDefault(f => f.Key == "limit").Value.FirstOrDefault();
         var (page, limit) = ModuleHelpers.GetPagination(_page, _limit);
-        var recipes = await _recipes.Find(page, limit, recipe => recipe.UserId == user.Id);
+        var recipes = await _recipes.FindByUser(user.Id ?? ObjectId.Empty, page, limit);
         await res.Negotiate(recipes);
         return;
       });
@@ -38,14 +38,29 @@ namespace Recetron.Api
       Post("", async (req, res) =>
       {
         var user = await _auth.ExtractUserAsync(ModuleHelpers.ExtractTokenStr(req.HttpContext));
-        if (user == null || user.Id == null)
+        if (user?.Id == null)
         {
           res.StatusCode = 422;
           await res.Negotiate(new ErrorResponse { Message = "Missing User from Token" });
           return;
         }
 
-        Recipe payload = await req.Bind<Recipe>();
+        var result =  await req.BindAndValidate<Recipe>();
+        if (!result.ValidationResult.IsValid)
+        {
+          res.StatusCode = 400;
+          await res.Negotiate(
+            new ErrorResponse
+            {
+              Message = "Failed Validation",
+              Errors = result.ValidationResult.GetFormattedErrors()
+            }
+          );
+          return;
+        }
+
+        var payload = result.Data;
+
         payload.UserId = user.Id;
         var recipe = await _recipes.Create(payload);
 
