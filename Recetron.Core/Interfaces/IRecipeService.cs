@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using Recetron.Core.Interfaces;
 using MongoDB.Bson;
 
-namespace Recetron.Api.Interfaces
+namespace Recetron.Core.Interfaces
 {
   public interface IRecipeService : ICrudable<Recipe>
   {

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using Recetron.Api.Interfaces;
+using Recetron.Core.Interfaces;
 using Recetron.Core.Models;
 
 namespace Recetron.Api.Services
