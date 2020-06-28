@@ -95,22 +95,20 @@ namespace Recetron.Api
           return;
         }
 
-        var result =  await req.BindAndValidate<Recipe>();
-        if (!result.ValidationResult.IsValid)
+        var (validationResult, recipe) = await req.BindAndValidate<Recipe>();
+        if (!validationResult.IsValid)
         {
           res.StatusCode = 400;
           await res.Negotiate(
             new ErrorResponse
             {
               Message = "Failed Validation",
-              Errors = result.ValidationResult.GetFormattedErrors()
+              Errors = validationResult.GetFormattedErrors()
             }
           );
           return;
         }
-
-        var recipe = result.Data;
-
+        
         if (recipe.UserId != user.Id)
         {
           res.StatusCode = 403;
@@ -124,6 +122,7 @@ namespace Recetron.Api
         }
   
         var didUpdate = await _recipes.Update(recipe);
+        
         if (!didUpdate)
         {
           res.StatusCode = 422;
