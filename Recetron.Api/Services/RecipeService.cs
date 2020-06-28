@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using MongoDB.Bson;
@@ -23,14 +21,14 @@ namespace Recetron.Api.Services
     {
       return _recipes
         .InsertOneAsync(item, cancellationToken: ct)
-        .ContinueWith(_ => item);
+        .ContinueWith(_ => item, cancellationToken: ct);
     }
 
     public Task<bool> Destroy(ObjectId id, CancellationToken ct = default)
     {
       return _recipes
         .DeleteOneAsync(recipe => recipe.Id == id, cancellationToken: ct)
-        .ContinueWith(res => res.Result.DeletedCount == 1);
+        .ContinueWith(res => res.Result.DeletedCount == 1, cancellationToken: ct);
     }
 
     public Task<PaginationResult<Recipe>> Find(int page, int limit, CancellationToken ct = default)
@@ -38,7 +36,7 @@ namespace Recetron.Api.Services
       var offset = limit * (page - 1);
       var count = _recipes.CountDocumentsAsync(FilterDefinition<Recipe>.Empty, cancellationToken: ct);
       var list = _recipes.Find(FilterDefinition<Recipe>.Empty).Limit(limit).Skip(offset).ToEnumerable(ct);
-      return count.ContinueWith(res => new PaginationResult<Recipe> { Count = res.Result, List = list });
+      return count.ContinueWith(res => new PaginationResult<Recipe> { Count = res.Result, List = list }, cancellationToken: ct);
     }
 
     public Task<PaginationResult<Recipe>> FindByUser(ObjectId userId, int page, int limit, CancellationToken ct = default)
@@ -47,7 +45,7 @@ namespace Recetron.Api.Services
       var filter = new FilterDefinitionBuilder<Recipe>().Where(recipe => recipe.UserId == userId);
       var count = _recipes.CountDocumentsAsync(filter, cancellationToken: ct);
       var list = _recipes.Find(filter).Limit(limit).Skip(offset).ToEnumerable(ct);
-      return count.ContinueWith(res => new PaginationResult<Recipe> { Count = res.Result, List = list });
+      return count.ContinueWith(res => new PaginationResult<Recipe> { Count = res.Result, List = list }, cancellationToken: ct);
     }
 
     public Task<IEnumerable<Recipe>> FindByNameAsync(string recipeName, CancellationToken ct = default)
@@ -61,7 +59,7 @@ namespace Recetron.Api.Services
     {
       return _recipes
         .FindAsync(recipe => recipe.Id == id, cancellationToken: ct)
-        .ContinueWith(res => res.Result.FirstOrDefault());
+        .ContinueWith(res => res.Result.FirstOrDefault(), cancellationToken: ct);
     }
 
     public Task<bool> Update(Recipe item, CancellationToken ct = default)
@@ -69,7 +67,7 @@ namespace Recetron.Api.Services
       var filter = new FilterDefinitionBuilder<Recipe>().Where(recipe => recipe.Id == item.Id);
       return _recipes
         .UpdateOneAsync(filter, item.ToBsonDocument<Recipe>(), cancellationToken: ct)
-        .ContinueWith(res => res.Result.ModifiedCount == 1);
+        .ContinueWith(res => res.Result.ModifiedCount == 1, cancellationToken: ct);
     }
   }
 }
