@@ -5,6 +5,7 @@ using Carter.Request;
 using Carter.Response;
 using MongoDB.Bson;
 using Recetron.Api.Interfaces;
+using Recetron.Core.Interfaces;
 using Recetron.Core.Models;
 
 namespace Recetron.Api
@@ -31,7 +32,7 @@ namespace Recetron.Api
         return;
       });
       
-      Get("{id:string}", async (req, res) =>
+      Get("{id}", async (req, res) =>
       {
         var strId = req.RouteValues.As<string>("id");
         var recipeId = ObjectId.Parse(strId);
@@ -62,22 +63,19 @@ namespace Recetron.Api
           return;
         }
 
-        var result =  await req.BindAndValidate<Recipe>();
-        if (!result.ValidationResult.IsValid)
+        var (validationResult, payload) = await req.BindAndValidate<Recipe>();
+        if (!validationResult.IsValid)
         {
           res.StatusCode = 400;
           await res.Negotiate(
             new ErrorResponse
             {
               Message = "Failed Validation",
-              Errors = result.ValidationResult.GetFormattedErrors()
+              Errors = validationResult.GetFormattedErrors()
             }
           );
           return;
         }
-
-        var payload = result.Data;
-
         payload.UserId = user.Id;
         var recipe = await _recipes.Create(payload);
 
@@ -138,7 +136,7 @@ namespace Recetron.Api
         await res.Negotiate(recipe);
       });
 
-      Delete("{id:string}", async (req, res) =>
+      Delete("{id}", async (req, res) =>
       {
         var strId = req.RouteValues.As<string>("id");
         var recipeId = ObjectId.Parse(strId);
