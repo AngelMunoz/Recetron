@@ -11,6 +11,6 @@ namespace Recetron.Core.Interfaces
   {
 
     Task<IEnumerable<Recipe>> FindByNameAsync(string recipeName, CancellationToken ct = default);
-    Task<PaginationResult<Recipe>> FindByUser(ObjectId userId, int page, int limit, CancellationToken ct = default);
+    Task<PaginationResult<Recipe>> FindByUser(string userId, int page, int limit, CancellationToken ct = default);
   }
 }

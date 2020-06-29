@@ -8,10 +8,10 @@ namespace Recetron.Core.Models
   public class Recipe
   {
 
-    [BsonId(IdGenerator = typeof(ObjectIdGenerator))]
-    public ObjectId? Id { get; set; }
+    [BsonId(IdGenerator = typeof(StringObjectIdGenerator))]
+    public string? Id { get; set; }
 
-    public ObjectId? UserId { get; set; }
+    public string? UserId { get; set; }
 
     public string? Title { get; set; }
 

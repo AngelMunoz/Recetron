@@ -12,13 +12,13 @@ namespace Recetron.Core.Interfaces
   {
     Task<PaginationResult<T>> Find(int page, int limit, CancellationToken ct = default);
 
-    Task<T> FindOne(ObjectId id, CancellationToken ct = default);
+    Task<T> FindOne(string id, CancellationToken ct = default);
 
     Task<T> Create(T item, CancellationToken ct = default);
 
     Task<bool> Update(T item, CancellationToken ct = default);
 
-    Task<bool> Destroy(ObjectId id, CancellationToken ct = default);
+    Task<bool> Destroy(string id, CancellationToken ct = default);
 
   }
 }

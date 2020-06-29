@@ -129,8 +129,9 @@ namespace Recetron.Api.Services
         tokenhandler.ValidateToken(token, parameters, out SecurityToken validated);
         var tk = tokenhandler.ReadJwtToken(token);
         var nameClaim = tk.Payload.Claims.FirstOrDefault(claim => claim.Type == "unique_name");
+        var filter = new FilterDefinitionBuilder<User>().Where(user => user.Id == nameClaim.Value);
         return _users
-          .Find(user => user.Id == ObjectId.Parse(nameClaim.Value))
+          .Find(filter)
           .FirstOrDefaultAsync()
           .ContinueWith(res =>
           {

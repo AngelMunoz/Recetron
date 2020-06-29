@@ -31,7 +31,7 @@ namespace Recetron.Services
       return await res.Content.ReadFromJsonAsync<Recipe>(cancellationToken: ct);
     }
 
-    public Task<bool> Destroy(ObjectId id, CancellationToken ct = default)
+    public Task<bool> Destroy(string id, CancellationToken ct = default)
     {
       return _http
         .DeleteAsync($"{_http.BaseAddress}/recipes/{id.ToString()}", cancellationToken: ct)
@@ -52,12 +52,12 @@ namespace Recetron.Services
 
     /// This method is not used in the UI please use <see cref="Recetron.Services.RecipeService.Find(int, int, CancellationToken)"/>
     [Obsolete("This method is not used in the UI, please use Find", true)]
-    public Task<PaginationResult<Recipe>> FindByUser(ObjectId userId, int page, int limit, CancellationToken ct = default)
+    public Task<PaginationResult<Recipe>> FindByUser(string userId, int page, int limit, CancellationToken ct = default)
     {
       throw new NotImplementedException();
     }
 
-    public Task<Recipe> FindOne(ObjectId id, CancellationToken ct = default)
+    public Task<Recipe> FindOne(string id, CancellationToken ct = default)
     {
       var uri = new Uri($"{_http.BaseAddress}/recipes/{id}");
       return _http.GetFromJsonAsync<Recipe>(uri, cancellationToken: ct);

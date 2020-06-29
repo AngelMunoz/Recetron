@@ -25,7 +25,7 @@ namespace Recetron.Api.Services
         .ContinueWith(_ => item, cancellationToken: ct);
     }
 
-    public Task<bool> Destroy(ObjectId id, CancellationToken ct = default)
+    public Task<bool> Destroy(string id, CancellationToken ct = default)
     {
       return _recipes
         .DeleteOneAsync(recipe => recipe.Id == id, cancellationToken: ct)
@@ -40,7 +40,7 @@ namespace Recetron.Api.Services
       return count.ContinueWith(res => new PaginationResult<Recipe> { Count = res.Result, List = list }, cancellationToken: ct);
     }
 
-    public Task<PaginationResult<Recipe>> FindByUser(ObjectId userId, int page, int limit, CancellationToken ct = default)
+    public Task<PaginationResult<Recipe>> FindByUser(string userId, int page, int limit, CancellationToken ct = default)
     {
       var offset = limit * (page - 1);
       var filter = new FilterDefinitionBuilder<Recipe>().Where(recipe => recipe.UserId == userId);
@@ -56,7 +56,7 @@ namespace Recetron.Api.Services
       return Task.FromResult(result);
     }
 
-    public Task<Recipe> FindOne(ObjectId id, CancellationToken ct = default)
+    public Task<Recipe> FindOne(string id, CancellationToken ct = default)
     {
       return _recipes
         .FindAsync(recipe => recipe.Id == id, cancellationToken: ct)

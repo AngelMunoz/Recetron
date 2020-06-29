@@ -6,8 +6,8 @@ namespace Recetron.Api.Models
 {
   public class User
   {
-    [BsonId(IdGenerator = typeof(ObjectIdGenerator))]
-    public ObjectId Id { get; set; }
+    [BsonId(IdGenerator = typeof(StringObjectIdGenerator))]
+    public string? Id { get; set; }
     public string? Email { get; set; }
     public string? Password { get; set; }
     public string? Name { get; set; }

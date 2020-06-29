@@ -27,18 +27,17 @@ namespace Recetron.Api
         var _page = req.Query.FirstOrDefault(f => f.Key == "page").Value.FirstOrDefault();
         var _limit = req.Query.FirstOrDefault(f => f.Key == "limit").Value.FirstOrDefault();
         var (page, limit) = ModuleHelpers.GetPagination(_page, _limit);
-        var recipes = await _recipes.FindByUser(user.Id ?? ObjectId.Empty, page, limit);
+        var recipes = await _recipes.FindByUser(user.Id ?? string.Empty, page, limit);
         await res.Negotiate(recipes);
         return;
       });
       
-      Get("{id}", async (req, res) =>
+      Get("/{id}", async (req, res) =>
       {
         var strId = req.RouteValues.As<string>("id");
-        var recipeId = ObjectId.Parse(strId);
-        var recipe = await _recipes.FindOne(recipeId);
+        var recipe = await _recipes.FindOne(strId);
         var user = await _auth.ExtractUserAsync(ModuleHelpers.ExtractTokenStr(req.HttpContext));
-        if (recipe.UserId != user?.Id)
+        if (recipe?.UserId != user?.Id)
         {
           res.StatusCode = 403;
           await res.Negotiate(
@@ -139,8 +138,7 @@ namespace Recetron.Api
       Delete("{id}", async (req, res) =>
       {
         var strId = req.RouteValues.As<string>("id");
-        var recipeId = ObjectId.Parse(strId);
-        var recipe = await _recipes.FindOne(recipeId);
+        var recipe = await _recipes.FindOne(strId);
         var user = await _auth.ExtractUserAsync(ModuleHelpers.ExtractTokenStr(req.HttpContext));
         if (recipe.UserId != user?.Id)
         {
@@ -154,7 +152,7 @@ namespace Recetron.Api
           return;
         }
 
-        var didDestroy = await _recipes.Destroy(recipeId);
+        var didDestroy = await _recipes.Destroy(strId);
         if (!didDestroy)
         {
           res.StatusCode = 422;
