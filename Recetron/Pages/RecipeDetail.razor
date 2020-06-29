@@ -1,0 +1,29 @@
+﻿@page "/recipes/{RecipeId}"
+@using Recetron.Core.Models
+@using System.Threading
+@using Recetron.Core.Interfaces
+
+@implements IDisposable
+
+@inject IRecipeService RecipeService
+<h1>The Recipe Id is @RecipeId!</h1>
+@_recipe?.Title
+@code {
+    [Parameter]
+    public string RecipeId { get; set; }
+  
+    private Recipe? _recipe { get; set; }
+
+    private readonly CancellationTokenSource _cts = new CancellationTokenSource();
+  
+  protected override async Task OnInitializedAsync()
+  {
+    _recipe = await RecipeService.FindOne(RecipeId, _cts.Token);
+  }
+
+  public void Dispose()
+  {
+    _cts?.Dispose();
+  }
+
+}

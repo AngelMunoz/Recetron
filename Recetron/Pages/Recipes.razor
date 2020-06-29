@@ -2,27 +2,49 @@
 @using Recetron.Core.Models
 @using System.Threading
 @using Recetron.Core.Interfaces
-@inject IRecipeService RecipeService
-<article class="rec-page">
-  @foreach (var recipe in recipes.List)
-  {
-    <div class="tile">
-      <div class="tile-icon">
-        <div class="example-tile-icon">
-          <i class="icon icon-file centered"></i>
-        </div>
-      </div>
-      <div class="tile-content">
-        <p class="tile-title">@recipe.Title</p>
-        <p class="tile-subtitle">@recipe.Description</p>
-      </div>
-      <div class="tile-action">
-        <button class="btn btn-primary">Check Recipe</button>
-      </div>
-    </div>
-  }
-</article>
 
+@implements IDisposable
+
+@inject IRecipeService RecipeService
+@inject NavigationManager NavigationManager
+
+
+<article class="rec-page recipes">
+  <ul class="tile-list">
+    @foreach (var recipe in recipes.List)
+      {
+        <li class="tile tile-centered">
+          <div class="tile-content">
+            <p class="tile-title">@recipe.Title</p>
+            <p class="tile-subtitle">@recipe.Description</p>
+          </div>
+          <div class="tile-action">
+            <button class="btn btn-primary" @onclick="@(e => NavigateToRecipe(recipe.Id))">
+              <CheffHat BackgroundColor="#fff"/>
+            </button>
+          </div>
+        </li>
+      }
+  </ul>
+</article>
+<style>
+  .rec-page.recipes
+  .tile-list {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .rec-page.recipes
+  .tile-list .tile {
+    height: 150px;
+    width: 268px;
+    padding: 1em;
+  }
+</style>
 
 @code {
   private int Page { get; set; } = 1;
@@ -32,8 +54,12 @@
 
   protected override async Task OnInitializedAsync()
   {
-    var result = await RecipeService.Find(Page, Limit, _cts.Token);
-    recipes = result;
+    recipes = await RecipeService.Find(Page, Limit, _cts.Token);
+  }
+  
+  private void NavigateToRecipe(string? recipeId)
+  {
+    NavigationManager.NavigateTo($"recipes/{recipeId ?? string.Empty}");
   }
 
   public void Dispose()
@@ -41,7 +67,5 @@
     _cts.Cancel();
     _cts.Dispose();
   }
-
-
 
 }
