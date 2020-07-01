@@ -1,4 +1,4 @@
-﻿@page "/recipes/{RecipeId}"
+@page "/recipes/{RecipeId}"
 @using Recetron.Core.Models
 @using System.Threading
 @using Recetron.Core.Interfaces
@@ -6,19 +6,56 @@
 @implements IDisposable
 
 @inject IRecipeService RecipeService
-<h1>The Recipe Id is @RecipeId!</h1>
-@_recipe?.Title
-@code {
-    [Parameter]
-    public string RecipeId { get; set; }
-  
-    private Recipe? _recipe { get; set; }
 
-    private readonly CancellationTokenSource _cts = new CancellationTokenSource();
-  
-  protected override async Task OnInitializedAsync()
+<article class="rec-page recipe-detail recbg-light">
+  <nav class="navbar recbg-info">
+    <section class="navbar-section"></section>
+    <section class="navbar-section">
+      <a class="btn btn-link" @onclick="@(_ => IsEditing = !IsEditing)">
+        @if (IsEditing)
+        {
+          <Cancel />
+        }
+        else
+        {
+          <Pencil />
+        }
+      </a>
+      <a class="btn btn-link" @onclick="@(_ => PromptDelete())"><Trash /></a>
+    </section>
+  </nav>
+ <RecipeForm IsEditing="@IsEditing" Recipe="recipe" OnSaveRecipe="SaveRecipe" />
+</article>
+
+
+@code {
+  [Parameter]
+  public string? RecipeId { get; set; }
+
+  private Recipe? recipe { get; set; }
+
+  private bool IsEditing { get; set; } = false;
+
+  private readonly CancellationTokenSource _cts = new CancellationTokenSource();
+
+  protected override async Task OnParametersSetAsync()
   {
-    _recipe = await RecipeService.FindOne(RecipeId, _cts.Token);
+    await base.OnParametersSetAsync();
+    recipe = await RecipeService.FindOne(RecipeId ?? "", _cts.Token);
+  }
+
+  private async void SaveRecipe(Recipe recipe)
+  {
+    var result = await RecipeService.Update(recipe, _cts.Token);
+    if(!result)
+    {
+      Console.WriteLine($"Could not update the Recipe with id {recipe.Id}");
+    }
+  }
+
+  private void PromptDelete()
+  {
+    Console.WriteLine("Delete Stuff");
   }
 
   public void Dispose()
