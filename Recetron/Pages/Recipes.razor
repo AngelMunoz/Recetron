@@ -9,54 +9,121 @@
 @inject NavigationManager NavigationManager
 
 
-<article class="rec-page recipes">
-  <ul class="tile-list">
-    @foreach (var recipe in recipes.List)
-      {
-        <li class="tile tile-centered">
-          <div class="tile-content">
-            <p class="tile-title">@recipe.Title</p>
-            <p class="tile-subtitle">@recipe.Description</p>
-          </div>
-          <div class="tile-action">
-            <button class="btn btn-primary" @onclick="@(e => NavigateToRecipe(recipe.Id))">
-              <CheffHat BackgroundColor="#fff"/>
-            </button>
-          </div>
-        </li>
-      }
-  </ul>
+<article class="rec-page recipes recbg-light">
+
+  @if (recipes.Count == 0 && !ShowAddRecipe)
+  {
+    <div class="empty">
+      <div class="empty-icon">
+        <FoodVariantOff />
+      </div>
+      <p class="empty-title h5">There are no recipes here :)</p>
+      <p class="empty-subtitle">CLick to add an empty recipe</p>
+      <div class="empty-action">
+        <button class="btn btn-link" @onclick="@(_ => ShowAddRecipe = !ShowAddRecipe)"><Add /></button>
+      </div>
+    </div>
+  }
+  else if (!ShowAddRecipe)
+  {
+    <header class="navbar recbg-light">
+      <section class="navbar-section">
+        <a class="btn btn-link c-auto">
+          Here&prime;s a list with your existing recipes
+        </a>
+      </section>
+      <section class="navbar-center">
+        <button class="btn btn-link" @onclick="@(_ => ShowAddRecipe = !ShowAddRecipe)"><Add /></button>
+      </section>
+    </header>
+  }
+
+  <section class="recipes-content">
+    @if (ShowAddRecipe)
+    {
+      <div class="form">
+        <button class="btn btn-link" @onclick="@(_ => ShowAddRecipe = !ShowAddRecipe)">Cancel</button>
+        <RecipeForm IsEditing="true" Recipe="@NewRecipe" OnSaveRecipe="@SaveNewRecipe" />
+      </div>
+    }
+
+    <div class="list">
+      <ul class="tile-list">
+        @foreach (var recipe in recipes.List)
+        {
+          <li class="tile tile-centered">
+            <div class="tile-content">
+              <p class="tile-title">@recipe.Title</p>
+              <p class="tile-subtitle">@recipe.Description</p>
+            </div>
+            <div class="tile-action">
+              <button class="btn btn-primary" @onclick="@(e => NavigateToRecipe(recipe.Id))">
+                <CheffHat BackgroundColor="#fff" />
+              </button>
+            </div>
+          </li>
+        }
+      </ul>
+    </div>
+  </section>
+
 </article>
 <style>
-  .rec-page.recipes
-  .tile-list {
+  .rec-page.recipes .recipes-content {
     display: flex;
     flex-direction: row;
     justify-content: space-around;
-    flex-wrap: wrap;
-    list-style: none;
-    margin: 0;
-    padding: 0;
   }
-  .rec-page.recipes
-  .tile-list .tile {
-    height: 150px;
-    width: 268px;
-    padding: 1em;
-  }
+
+    @@media(max-width: 768px) {
+      .rec-page.recipes .recipes-content {
+          flex-direction: column;
+        }
+    }
+
+    .rec-page.recipes .recipes-content .tile-list {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .rec-page.recipes .recipes-content .tile-list .tile {
+      height: 150px;
+      width: 268px;
+      padding: 0.5em;
+    }
 </style>
 
 @code {
   private int Page { get; set; } = 1;
   private int Limit { get; set; } = 10;
+  private bool ShowAddRecipe { get; set; } = false;
   private readonly CancellationTokenSource _cts = new CancellationTokenSource();
   private PaginationResult<Recipe> recipes { get; set; } = new PaginationResult<Recipe>();
+
+  private Recipe NewRecipe = new Recipe();
 
   protected override async Task OnInitializedAsync()
   {
     recipes = await RecipeService.Find(Page, Limit, _cts.Token);
   }
-  
+
+
+  private async void SaveNewRecipe(Recipe? recipe)
+  {
+    if (recipe == null) return;
+
+    var saved = await RecipeService.Create(recipe, _cts.Token);
+    recipes = await RecipeService.Find(Page, Limit, _cts.Token);
+    NewRecipe = new Recipe();
+    ShowAddRecipe = false;
+    StateHasChanged();
+  }
+
   private void NavigateToRecipe(string? recipeId)
   {
     NavigationManager.NavigateTo($"recipes/{recipeId ?? string.Empty}");
