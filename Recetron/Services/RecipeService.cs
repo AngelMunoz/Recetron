@@ -4,7 +4,6 @@ using Recetron.Core.Models;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading;
-using MongoDB.Bson;
 using System.Collections.Generic;
 using Recetron.Core.Interfaces;
 
@@ -34,7 +33,7 @@ namespace Recetron.Services
     public Task<bool> Destroy(string id, CancellationToken ct = default)
     {
       return _http
-        .DeleteAsync($"{_http.BaseAddress}/recipes/{id.ToString()}", cancellationToken: ct)
+        .DeleteAsync($"{_http.BaseAddress}/recipes/{id}", cancellationToken: ct)
         .ContinueWith(res => res.Result.IsSuccessStatusCode, cancellationToken: ct);
     }
 
