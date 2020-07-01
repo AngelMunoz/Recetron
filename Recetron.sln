@@ -1,13 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26124.0
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30128.74
 MinimumVisualStudioVersion = 15.0.26124.0
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recetron", "Recetron\Recetron.csproj", "{D5E97CEB-E679-48B6-9D68-2FB04BBBC4DC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Recetron", "Recetron\Recetron.csproj", "{D5E97CEB-E679-48B6-9D68-2FB04BBBC4DC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recetron.Api", "Recetron.Api\Recetron.Api.csproj", "{146EBC63-A592-4199-8490-18FC3B01BE7C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Recetron.Api", "Recetron.Api\Recetron.Api.csproj", "{146EBC63-A592-4199-8490-18FC3B01BE7C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recetron.Core", "Recetron.Core\Recetron.Core.csproj", "{402EB41D-569A-4F60-8AF4-DF102E948D8F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Recetron.Core", "Recetron.Core\Recetron.Core.csproj", "{402EB41D-569A-4F60-8AF4-DF102E948D8F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,9 +17,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{D5E97CEB-E679-48B6-9D68-2FB04BBBC4DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -58,5 +55,11 @@ Global
 		{402EB41D-569A-4F60-8AF4-DF102E948D8F}.Release|x64.Build.0 = Release|Any CPU
 		{402EB41D-569A-4F60-8AF4-DF102E948D8F}.Release|x86.ActiveCfg = Release|Any CPU
 		{402EB41D-569A-4F60-8AF4-DF102E948D8F}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {317EE36C-2A82-4A72-8EA8-6AB2D97A1329}
 	EndGlobalSection
 EndGlobal
