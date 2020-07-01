@@ -119,20 +119,7 @@ namespace Recetron.Api
         }
   
         var didUpdate = await _recipes.Update(recipe);
-        
-        if (!didUpdate)
-        {
-          res.StatusCode = 422;
-          await res.Negotiate(
-            new ErrorResponse
-            {
-              Message = "Could Update Recipe",
-            }
-          );
-          return;
-        }
-
-        await res.Negotiate(recipe);
+        await res.Negotiate(didUpdate);
       });
 
       Delete("{id}", async (req, res) =>

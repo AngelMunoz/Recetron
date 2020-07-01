@@ -67,7 +67,7 @@ namespace Recetron.Api.Services
     {
       var filter = new FilterDefinitionBuilder<Recipe>().Where(recipe => recipe.Id == item.Id);
       return _recipes
-        .UpdateOneAsync(filter, item.ToBsonDocument<Recipe>(), cancellationToken: ct)
+        .ReplaceOneAsync(filter, item, cancellationToken: ct)
         .ContinueWith(res => res.Result.ModifiedCount == 1, cancellationToken: ct);
     }
   }
