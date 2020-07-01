@@ -1,0 +1,331 @@
+@using Recetron.Core.Models
+
+
+<article class="rec-recipe-form recbg-light">
+
+  @if (isEditing && recipe != null)
+  {
+    <nav class="navbar">
+      <section class="navbar-section">
+        <div class="navbar-item">
+          <label class="form-checkbox form-inline">
+            <input type="checkbox" @bind-value="ignorePending" />
+            <i class="form-icon"></i> Ignore pending changes
+          </label>
+        </div>
+      </section>
+      <section class="navbar-section">
+        <button class="btn btn-primary" @onclick="@(_ => TriggerForm())">
+          Save Recipe
+        </button>
+      </section>
+    </nav>
+    @if (showPendingChangesMessage)
+    {
+      <p>
+        You have a pending ingredient or step, please press the <Add /> button or tick the "Ignore pending changes" box above
+      </p>
+    }
+    <div class="edit-section">
+      <section class="form-section recbg-info">
+        <header class="section-header recbg-light">
+          Recipe Information
+        </header>
+        <EditForm EditContext="MainEditContext">
+          <DataAnnotationsValidator />
+          <ValidationSummary />
+          <section class="form-group">
+            <label class="form-label" for="title">Recipe Title</label>
+            <InputText id="title"
+                       name="title"
+                       class="form-input"
+                       placeholder="Name of the dish"
+                       @bind-Value="@recipe.Title" />
+          </section>
+          <section class="form-group">
+            <label class="form-label" for="recipeImageUrl">Picture Url</label>
+            <InputText class="form-input" type="url" id="recipeImageIrl" name="recipeImageIrl" placeholder="A picture URL address to show what to do in this step" @bind-Value="@recipe.ImageUrl" />
+          </section>
+          <section class="form-group">
+            <label class="form-label" for="description">Description</label>
+            <InputTextArea id="description"
+                           name="description"
+                           class="form-input"
+                           placeholder="Briefely describe what this dish is about"
+                           @bind-Value="@recipe.Description" />
+          </section>
+          <section class="form-group">
+            <label class="form-label" for="notes">Notes</label>
+            <InputTextArea id="notes"
+                           name="notes"
+                           class="form-input"
+                           placeholder="Add some tips or notes to this recipe"
+                           @bind-Value="@recipe.Notes" />
+          </section>
+        </EditForm>
+      </section>
+      <section class="form-section recbg-info">
+        <header class="section-header recbg-light">
+          Recipe Ingredients
+        </header>
+        <ul class="ingredient-list">
+          @foreach (var ingredient in recipe.Ingredients)
+          {
+            <li @key="ingredient!.Name" class="ingredient-list-item">
+              <input class="recbg-default ingredient-input name" type="text" @bind-value="ingredient!.Name" />
+              <input class="recbg-default ingredient-input" type="text" @bind-value="ingredient!.Amount" />
+              <input class="recbg-default ingredient-input" type="text" @bind-value="ingredient!.Unit" />
+              <span class="c-hand" @onclick="@(_ => DeleteIngredient(ingredient))"><Trash BackgroundColor="#fff" /></span>
+            </li>
+          }
+        </ul>
+        <EditForm EditContext="IngredientsContext" OnValidSubmit="AddIngredient" @onreset="@(args => ResetForm(args, ResetableForm.Ingredients))">
+          <label for="ingredientName">Ingredient: Amount - Unit</label>
+          <section class="ingredient-group">
+            <InputText id="ingredientName"
+                       name="ingredientName"
+                       class="recbg-light ingredient-input name"
+                       placeholder="Ingredient"
+                       @bind-Value="@NewIngredient.Name" />
+            <InputText id="amount"
+                       name="amount"
+                       class="recbg-light ingredient-input"
+                       placeholder="1 1/2"
+                       @bind-Value="@NewIngredient.Amount" />
+            <InputText id="unit"
+                       name="unit"
+                       class="recbg-light ingredient-input"
+                       placeholder="ml, oz, gr, etc."
+                       @bind-Value="@NewIngredient.Unit" />
+          </section>
+          <button type="submit" class="btn btn-primary">
+            <Add BackgroundColor="#fff" />
+          </button>
+          <button type="reset" class="btn btn-link">
+            Cancel
+          </button>
+        </EditForm>
+      </section>
+      <section class="form-section recbg-info">
+        <header class="section-header recbg-light">
+          Recipe Steps
+        </header>
+        <ol class="step-list">
+          @foreach (var step in recipe.Steps)
+          {
+            <li class="step-list-item" @key="step!.Order">
+              <textarea class="recbg-default step-text" @bind="step!.Directions"></textarea>
+              <span class="c-hand" @onclick="@(_ => DeleteStep(step))"><Trash BackgroundColor="#fff" /></span>
+            </li>
+          }
+        </ol>
+        <EditForm Model="@NewRecipeStep" OnValidSubmit="AddRecipeStep" @onreset="@(args => ResetForm(args, ResetableForm.Steps))">
+          <section class="form-group">
+            <label class="form-label" for="stepImageUrl">Picture Url</label>
+            <InputText class="form-input" type="url" id="stepImageUrl" name="stepImageUrl" placeholder="A picture URL address to show what to do in this step" @bind-Value="@NewRecipeStep.ImageUrl" />
+          </section>
+          <section class="form-group">
+            <label class="form-label" for="directions">Directions</label>
+            <InputTextArea id="directions"
+                           name="directions"
+                           class="form-input"
+                           placeholder="ex. add water"
+                           @bind-Value="@NewRecipeStep.Directions" />
+          </section>
+          <button type="submit" class="btn btn-primary">
+            <Add BackgroundColor="#fff" />
+          </button>
+          <button type="reset" class="btn btn-link">
+            Cancel
+          </button>
+        </EditForm>
+      </section>
+    </div>
+  }
+  else
+  {
+    <div class="view-section">
+      <section class="recipe-section">
+      </section>
+    </div>
+  }
+</article>
+<style>
+  .rec-recipe-form {
+    padding: 1em;
+  }
+
+    .rec-recipe-form .edit-section {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+    }
+
+      .rec-recipe-form .edit-section .form-section {
+        margin: 0.5em;
+        padding: 0.52em;
+        display: flex;
+        flex-direction: column;
+        width: 320px;
+      }
+
+  .form-section .step-list {
+    margin: 0;
+  }
+
+    .form-section .step-list .step-list-item {
+      display: flex;
+      justify-content: space-around;
+      align-content: center;
+      flex-wrap: wrap;
+    }
+
+  .step-text {
+    border: none;
+  }
+
+  .form-section .ingredient-list {
+    margin: 0;
+  }
+
+  .form-section .ingredient-list .ingredient-list-item {
+    display: flex;
+    justify-content: space-around;
+    align-content: center;
+    flex-wrap: wrap;
+  }
+
+  .form-section .ingredient-group {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-content: center;
+    margin: 0.5em 0;
+    flex-wrap: wrap;
+  }
+
+  .ingredient-input {
+    max-width: 48px;
+    border: none;
+  }
+
+    .ingredient-input.name {
+      max-width: 112px;
+    }
+
+  .section-header {
+    align-self: center;
+    font-weight: 500;
+    width: 100%;
+    padding: 1em;
+  }
+
+  .rec-recipe-form .view-section {
+    padding: 0.5em;
+  }
+</style>
+
+@code {
+  private EditContext? MainEditContext;
+  private EditContext? IngredientsContext;
+  private EditContext? StepsContext;
+  private bool isEditing = false;
+  private bool ignorePending = false;
+  private bool showPendingChangesMessage = false;
+  private Recipe? recipe = null;
+
+  private Ingredient NewIngredient = new Ingredient();
+  private RecipeStep NewRecipeStep = new RecipeStep() { Order = 1 };
+
+  [Parameter]
+  public bool IsEditing { get => isEditing; set => isEditing = value; }
+
+  [Parameter]
+  public Recipe? Recipe { get => recipe; set => recipe = value; }
+
+  [Parameter]
+  public EventCallback<Recipe?> OnSaveRecipe { get; set; }
+
+  protected override void OnParametersSet()
+  {
+    if (recipe != null)
+    {
+      MainEditContext = new EditContext(recipe);
+    }
+    IngredientsContext = new EditContext(NewIngredient);
+    StepsContext = new EditContext(NewRecipeStep);
+  }
+
+  private void AddIngredient()
+  {
+    recipe!.Ingredients = recipe!.Ingredients?.Append(NewIngredient)!;
+    NewIngredient = new Ingredient();
+    IngredientsContext?.MarkAsUnmodified();
+  }
+
+  private void DeleteIngredient(Ingredient ingredient)
+  {
+    recipe!.Ingredients = recipe!.Ingredients.Where(i => i.Name != ingredient.Name && i.Amount != ingredient.Amount && i.Unit != ingredient.Unit);
+    StateHasChanged();
+  }
+
+  private void AddRecipeStep()
+  {
+    NewRecipeStep.Order = (recipe!.Steps.LastOrDefault()?.Order + 1) ?? 1;
+    recipe!.Steps = recipe!.Steps.Append(NewRecipeStep);
+    NewRecipeStep = new RecipeStep();
+    StepsContext?.MarkAsUnmodified();
+  }
+
+  private void DeleteStep(RecipeStep step)
+  {
+    recipe!.Steps = recipe!
+      .Steps
+      .Where(s => s.Order != step.Order).Select((s, i) =>
+      {
+        s.Order = i + 1;
+        return s;
+      });
+    StateHasChanged();
+  }
+
+  private async void TriggerForm()
+  {
+    var isTherePendingChanges = (StepsContext?.IsModified() ?? false) || (IngredientsContext?.IsModified() ?? false);
+
+    if (isTherePendingChanges && !ignorePending)
+    {
+      showPendingChangesMessage = true;
+      return;
+    }
+
+    var isReady = MainEditContext?.Validate() ?? false;
+
+    if (isReady)
+    {
+      await OnSaveRecipe.InvokeAsync(recipe);
+      showPendingChangesMessage = false;
+    }
+  }
+
+  private void ResetForm(EventArgs args, ResetableForm form)
+  {
+    switch (form)
+    {
+      case ResetableForm.Ingredients:
+        NewIngredient = new Ingredient();
+        IngredientsContext?.MarkAsUnmodified();
+        break;
+      case ResetableForm.Steps:
+        NewRecipeStep = new RecipeStep();
+        StepsContext?.MarkAsUnmodified();
+        break;
+    }
+  }
+
+  private enum ResetableForm
+  {
+    Ingredients,
+    Steps
+  }
+}
