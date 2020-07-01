@@ -15,7 +15,7 @@ namespace Recetron
       };
     public T Deserialize<T>(string json)
     {
-      return JsonSerializer.Deserialize<T>(json, _options);
+      return JsonSerializer.Deserialize<T>(json, _options)!;
     }
 
     public string Serialize(object obj)
