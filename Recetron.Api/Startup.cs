@@ -6,7 +6,9 @@ namespace Recetron.Api
   using System.Diagnostics;
   using System.Security.Claims;
   using System.Text;
+
   using Carter;
+
   using Microsoft.AspNetCore.Authentication.JwtBearer;
   using Microsoft.AspNetCore.Builder;
   using Microsoft.AspNetCore.Hosting;
@@ -14,6 +16,7 @@ namespace Recetron.Api
   using Microsoft.Extensions.DependencyInjection;
   using Microsoft.Extensions.Hosting;
   using Microsoft.IdentityModel.Tokens;
+
   using Recetron.Api.Interfaces;
   using Recetron.Api.Services;
 
@@ -64,6 +67,13 @@ namespace Recetron.Api
       if (env.IsDevelopment())
       {
         app.UseCors(o => o.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
+      }
+      else
+      {
+        app.UseCors(o => o
+          .WithMethods("POST", "PUT", "GET", "DELETE", "HEAD", "OPTIONS")
+          .AllowAnyHeader()
+          .WithOrigins("https://recetron-client.web.app"));
       }
 
       app.UseRouting();
