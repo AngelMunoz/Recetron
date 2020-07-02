@@ -123,7 +123,7 @@ namespace Recetron.Api
         await res.Negotiate(didUpdate);
       });
 
-      Delete("{id}", async (req, res) =>
+      Delete("/{id}", async (req, res) =>
       {
         var strId = req.RouteValues.As<string>("id");
         var recipe = await _recipes.FindOne(strId);
