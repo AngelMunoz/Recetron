@@ -6,6 +6,7 @@
 @implements IDisposable
 
 @inject IRecipeService RecipeService
+@inject NavigationManager NavService
 
 <article class="rec-page recipe-detail recbg-light">
   <nav class="navbar recbg-light">
@@ -23,12 +24,49 @@
           <Pencil />
         }
       </a>
-      <a class="btn btn-link" @onclick="@(_ => PromptDelete())"><Trash /></a>
+      <a class="btn btn-link" @onclick="@(_ => IsDeleting = true)">
+        <Trash />
+      </a>
     </section>
   </nav>
- <RecipeForm IsEditing="@IsEditing" Recipe="recipe" OnSaveRecipe="SaveRecipe" />
-</article>
+  @if (IsDeleting)
+  {
+    <div class="panel recbg-info delete-propmpt-panel">
+      <div class="panel-header">
+        <div class="panel-title">Delete &quot;@recipe?.Title&quot;</div>
+      </div>
+      <div class="panel-body">
+        <p>
+          Are you sure you want to delete this recipe? <br />
+          all of it's contents will be lost
+        </p>
+      </div>
+      <div class="panel-footer">
+        <button class="btn" @onclick="@(_ => DeleteRecipe())">Yes, Delete</button>
+        <button class="btn btn-primary" @onclick="@(_ => IsDeleting = false)">No, Cancel</button>
+      </div>
+    </div>
+  }
 
+  @if (IsEditing && recipe != null)
+  {
+    <RecipeForm Recipe="recipe" OnSaveRecipe="SaveRecipe" />
+  }
+  else
+  {
+    <RecipeView Recipe="recipe" />
+  }
+</article>
+<style>
+  .recipe-detail {
+    display: flex;
+    flex-direction: column;
+  }
+  .delete-propmpt-panel {
+    align-self: center;
+    margin: 0.5em;
+  }
+</style>
 
 @code {
   [Parameter]
@@ -36,7 +74,8 @@
 
   private Recipe? recipe { get; set; }
 
-  private bool IsEditing { get; set; } = false;
+  private bool IsEditing = false;
+  private bool IsDeleting = false;
 
   private readonly CancellationTokenSource _cts = new CancellationTokenSource();
 
@@ -49,20 +88,28 @@
   private async void SaveRecipe(Recipe recipe)
   {
     var result = await RecipeService.Update(recipe, _cts.Token);
-    if(!result)
+    if (!result)
     {
       Console.WriteLine($"Could not update the Recipe with id {recipe.Id}");
     }
   }
 
-  private void PromptDelete()
+  private async void DeleteRecipe()
   {
-    Console.WriteLine("Delete Stuff");
+    var success = await RecipeService.Destroy(recipe!.Id!);
+    if (success)
+    {
+      NavService.NavigateTo("/recipes");
+    }
+    else
+    {
+      Console.WriteLine($"Could not Delete Recipe with id: {recipe?.Id}");
+    }
   }
 
   public void Dispose()
   {
-    _cts?.Dispose();
+    _cts.Dispose();
   }
 
 }

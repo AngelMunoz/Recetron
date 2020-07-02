@@ -43,7 +43,7 @@
     {
       <div class="form">
         <button class="btn btn-link" @onclick="@(_ => ShowAddRecipe = !ShowAddRecipe)">Cancel</button>
-        <RecipeForm IsEditing="true" Recipe="@NewRecipe" OnSaveRecipe="@SaveNewRecipe" />
+        <RecipeForm Recipe="@NewRecipe" OnSaveRecipe="@SaveNewRecipe" />
       </div>
     }
 
