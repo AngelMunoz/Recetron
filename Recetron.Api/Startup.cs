@@ -31,6 +31,7 @@ namespace Recetron.Api
       services
         .AddScoped<IEnvVarService, EnvVarService>()
         .AddSingleton<IDBService, DBService>()
+        .AddScoped<IBackgroundPictureService, BackgroundPictureService>()
         .AddScoped<IAuthService, AuthService>()
         .AddScoped<IRecipeService, RecipeService>();
 
