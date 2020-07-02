@@ -51,7 +51,7 @@
       <ul class="tile-list">
         @foreach (var recipe in recipes.List)
         {
-          <li class="tile tile-centered">
+          <li class="tile tile-centered recbg-default">
             <div class="tile-content">
               <p class="tile-title">@recipe.Title</p>
               <p class="tile-subtitle">@recipe.Description</p>
@@ -92,9 +92,9 @@
     }
 
     .rec-page.recipes .recipes-content .tile-list .tile {
-      height: 150px;
       width: 268px;
       padding: 0.5em;
+      margin: 0.5em;
     }
 </style>
 

@@ -12,7 +12,8 @@ namespace Recetron.Api
 {
   public class RecipeModule : CarterModule
   {
-    public RecipeModule(IAuthService _auth, IRecipeService _recipes) : base("/api/recipes")
+    public RecipeModule(IAuthService _auth, IRecipeService _recipes)
+      : base("/api/recipes")
     {
       this.Before = ctx => ModuleHelpers.VerifyJwt(ctx, _auth);
       Get("", async (req, res) =>

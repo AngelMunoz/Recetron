@@ -8,8 +8,10 @@
 @inject IRecipeService RecipeService
 
 <article class="rec-page recipe-detail recbg-light">
-  <nav class="navbar recbg-info">
-    <section class="navbar-section"></section>
+  <nav class="navbar recbg-light">
+    <section class="navbar-section">
+      <a class="btn btn-link">@recipe?.Title</a>
+    </section>
     <section class="navbar-section">
       <a class="btn btn-link" @onclick="@(_ => IsEditing = !IsEditing)">
         @if (IsEditing)

@@ -1,4 +1,4 @@
-﻿@page "/auth"
+@page "/auth"
 @using Recetron.Core.Models
 @using Recetron.Interfaces
 @inject IAuthService AuthService
@@ -7,7 +7,7 @@
 
 
 <section class="rec-page rec-auth recbg-light">
-  <h1 class="text-center">Auth Page</h1>
+  <h1 class="text-center">Welcome</h1>
   <ul class="tab tab-block" >
     <li class="tab-item @(@IsActive("login") ? "active" : "")">
       <a @onclick="@(_ => @SetActiveTab("login"))">Login</a>
