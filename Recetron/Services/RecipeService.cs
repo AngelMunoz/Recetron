@@ -12,16 +12,17 @@ namespace Recetron.Services
   public class RecipeService : IRecipeService
   {
 
-    private readonly HttpClient _http;
+    private readonly IHttpClientFactory httpFactory;
 
     public RecipeService(IHttpClientFactory clientFactory)
     {
-      _http = clientFactory.CreateClient(Constants.API_CLIENT_NAME);
+      httpFactory = clientFactory;
     }
 
     public async Task<Recipe> Create(Recipe item, CancellationToken ct = default)
     {
-      var res = await _http.PostAsJsonAsync<Recipe>($"{_http.BaseAddress}/recipes", item, cancellationToken: ct);
+      using var http = httpFactory.CreateClient(Constants.API_CLIENT_NAME);
+      var res = await http.PostAsJsonAsync($"{http.BaseAddress}/recipes", item, cancellationToken: ct);
       if (!res.IsSuccessStatusCode)
       {
         var response = await res.Content.ReadFromJsonAsync<ErrorResponse>(cancellationToken: ct);
@@ -30,23 +31,25 @@ namespace Recetron.Services
       return await res.Content.ReadFromJsonAsync<Recipe>(cancellationToken: ct);
     }
 
-    public Task<bool> Destroy(string id, CancellationToken ct = default)
+    public async Task<bool> Destroy(string id, CancellationToken ct = default)
     {
-      return _http
-        .DeleteAsync($"{_http.BaseAddress}/recipes/{id}", cancellationToken: ct)
-        .ContinueWith(res => res.Result.IsSuccessStatusCode, cancellationToken: ct);
+      using var http = httpFactory.CreateClient(Constants.API_CLIENT_NAME);
+      var res = await http.DeleteAsync($"{http.BaseAddress}/recipes/{id}", cancellationToken: ct);
+      return res.IsSuccessStatusCode;
     }
 
-    public Task<PaginationResult<Recipe>> Find(int page = 1, int limit = 10, CancellationToken ct = default)
+    public async Task<PaginationResult<Recipe>> Find(int page = 1, int limit = 10, CancellationToken ct = default)
     {
-      var uri = new Uri($"{_http.BaseAddress}/recipes?page={page}&limit={limit}");
-      return _http.GetFromJsonAsync<PaginationResult<Recipe>>(uri, cancellationToken: ct);
+      using var http = httpFactory.CreateClient(Constants.API_CLIENT_NAME);
+      var uri = new Uri($"{http.BaseAddress}/recipes?page={page}&limit={limit}");
+      return await http.GetFromJsonAsync<PaginationResult<Recipe>>(uri, cancellationToken: ct);
     }
 
-    public Task<IEnumerable<Recipe>> FindByNameAsync(string recipeName, CancellationToken ct = default)
+    public async Task<IEnumerable<Recipe>> FindByNameAsync(string recipeName, CancellationToken ct = default)
     {
-      var uri = new Uri($"{_http.BaseAddress}/recipes?searchByName={recipeName}");
-      return _http.GetFromJsonAsync<IEnumerable<Recipe>>(uri, cancellationToken: ct);
+      using var http = httpFactory.CreateClient(Constants.API_CLIENT_NAME);
+      var uri = new Uri($"{http.BaseAddress}/recipes?searchByName={recipeName}");
+      return await http.GetFromJsonAsync<IEnumerable<Recipe>>(uri, cancellationToken: ct);
     }
 
     /// This method is not used in the UI please use <see cref="Recetron.Services.RecipeService.Find(int, int, CancellationToken)"/>
@@ -56,15 +59,17 @@ namespace Recetron.Services
       throw new NotImplementedException();
     }
 
-    public Task<Recipe> FindOne(string id, CancellationToken ct = default)
+    public async Task<Recipe> FindOne(string id, CancellationToken ct = default)
     {
-      var uri = new Uri($"{_http.BaseAddress}/recipes/{id}");
-      return _http.GetFromJsonAsync<Recipe>(uri, cancellationToken: ct);
+      using var http = httpFactory.CreateClient(Constants.API_CLIENT_NAME);
+      var uri = new Uri($"{http.BaseAddress}/recipes/{id}");
+      return await http.GetFromJsonAsync<Recipe>(uri, cancellationToken: ct);
     }
 
     public async Task<bool> Update(Recipe item, CancellationToken ct = default)
     {
-      var res = await _http.PutAsJsonAsync<Recipe>($"{_http.BaseAddress}/recipes", item, cancellationToken: ct);
+      using var http = httpFactory.CreateClient(Constants.API_CLIENT_NAME);
+      var res = await http.PutAsJsonAsync<Recipe>($"{http.BaseAddress}/recipes", item, cancellationToken: ct);
       if (!res.IsSuccessStatusCode)
       {
         var response = await res.Content.ReadFromJsonAsync<ErrorResponse>(cancellationToken: ct);
