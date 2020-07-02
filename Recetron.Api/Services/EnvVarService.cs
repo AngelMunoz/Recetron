@@ -9,5 +9,10 @@ namespace Recetron.Api.Services
     {
       return Environment.GetEnvironmentVariable("JWT_KEY") ?? "Some super secret key";
     }
+
+    public string GetUnsplashAccessToken()
+    {
+      return Environment.GetEnvironmentVariable("UNSPLASH_API") ?? throw new NullReferenceException("Unsplash Access Token Not found in Environment");
+    }
   }
 }

@@ -9,5 +9,6 @@ namespace Recetron.Api.Interfaces
   public interface IEnvVarService
   {
     string GetJwtSecret();
+    string GetUnsplashAccessToken();
   }
 }
