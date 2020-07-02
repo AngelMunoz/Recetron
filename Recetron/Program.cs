@@ -28,9 +28,10 @@ namespace Recetron
       services
         .AddBlazoredLocalStorage()
         .AddScoped<IAuthService, AuthService>()
-        .AddScoped<IRecipeService, RecipeService>()
-        .AddHttpClient(Constants.AUTH_CLIENT_NAME, client => client.BaseAddress = new Uri($"{baseApiUrl}/auth"));
+        .AddScoped<IRecipeService, RecipeService>();
 
+      services.AddHttpClient(Constants.AUTH_CLIENT_NAME, client => client.BaseAddress = new Uri($"{baseApiUrl}/auth"));
+      services.AddHttpClient(Constants.BG_PICTURE_URL_NAME, client => client.BaseAddress = new Uri($"{baseApiUrl}/api/background-picture"));
       services.AddHttpClient(Constants.API_CLIENT_NAME, (sp, client) =>
         {
           client.BaseAddress = new Uri($"{baseApiUrl}/api");

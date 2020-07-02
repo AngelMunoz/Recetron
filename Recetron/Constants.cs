@@ -20,11 +20,16 @@ namespace Recetron
 
     public static readonly string USER_DATA_NAME = "user_data";
 
+    public static readonly string BG_PICTURE_URL_NAME = "background-picture";
+
+    public static readonly string UNSPLASH_PICTURE_KEY_NAME = "unsplash-picture";
+
     public static readonly string AUTH_URL = "/auth";
 
     public static readonly string RECIPES_URL = "/recipes";
 
     public static readonly string NOTES_URL = "/notes";
+
   }
 
 }

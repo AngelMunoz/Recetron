@@ -1,10 +1,19 @@
-﻿@using Recetron.Interfaces
+@using Recetron.Interfaces
+@using Recetron.Core.Models
+
 @inject IAuthService Auth
 @inject NavigationManager Nav
+@inject Blazored.LocalStorage.ISyncLocalStorageService LocalStorage
+@inject IHttpClientFactory HttpFactory
+@inject IJSRuntime Js
+
+@implements IDisposable
 
 <Router AppAssembly="@typeof(Program).Assembly">
     <Found Context="routeData">
+      <CascadingValue Value="picture">
         <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+      </CascadingValue>
     </Found>
     <NotFound>
         <LayoutView Layout="@typeof(MainLayout)">
@@ -15,7 +24,7 @@
 
 
 @code {
-
+  private UnsplashPicture? picture;
 
   protected override void OnInitialized()
   {
@@ -31,6 +40,17 @@
     }
   }
 
+  protected override async Task OnInitializedAsync()
+  {
+    var record = LocalStorage.GetItem<UnsplashPicture>(Constants.UNSPLASH_PICTURE_KEY_NAME);
+    await SetBGUrl(record, true);
+    using var http = HttpFactory.CreateClient(Constants.BG_PICTURE_URL_NAME);
+    var picture = await http.GetFromJsonAsync<UnsplashPicture>(http.BaseAddress);
+    LocalStorage.SetItem<UnsplashPicture>(Constants.UNSPLASH_PICTURE_KEY_NAME, picture);
+    await SetBGUrl(picture);
+    this.picture = picture;
+  }
+
   private void OnAuthStateChanged(object sender, bool isAuthenticated)
   {
     if (isAuthenticated)
@@ -42,6 +62,22 @@
     {
       Nav.NavigateTo(Constants.AUTH_URL);
     }
+  }
+
+  private async Task SetBGUrl(UnsplashPicture? picture, bool setNow = false)
+  {
+    if (picture == null) { return; }
+    var pictureUrl = picture?.Urls?.Regular?.ToString();
+    if (setNow && !string.IsNullOrEmpty(pictureUrl))
+    {
+
+      await Js.InvokeVoidAsync("document.documentElement.style.setProperty", new string[] { "--main-background-image", $"url('{pictureUrl}')" });
+      return;
+    }
+    _ = Task.Run(async () => {
+      await Task.Delay(TimeSpan.FromMinutes(3));
+      await Js.InvokeVoidAsync("document.documentElement.style.setProperty", new string[] { "--main-background-image", $"url('{pictureUrl}')" });
+    });
   }
 
 
