@@ -1,70 +1,77 @@
 :root {
-    --main-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-    --main-background-image: linear-gradient(-225deg, #CBBACC 0%, #2580B3 100%);
-    --element-background: rgba(180, 180, 180, 0.3);
-    --element-background-light: rgba(255, 255, 255, 0.30);
-    --element-background-dark: rgba(0, 0, 0, 0.45);
-    --element-background-success: rgba(0, 255, 85, 0.45);
-    --element-background-error: rgba(255, 0, 0, 0.45);
-    --element-background-info: rgba(0, 204, 255, 0.15);
+  --main-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  --main-background-image: linear-gradient(129deg, rgba(64,154,191,1) 16%, rgba(154,191,64,1) 100%, rgba(191,64,154,1) 100%);
+  --element-background: rgba(180, 180, 180, 0.3);
+  --element-background-light: rgba(255, 255, 255, 0.60);
+  --element-background-dark: rgba(0, 0, 0, 0.90);
+  --element-background-success: rgba(0, 255, 85, 0.90);
+  --element-background-error: rgba(255, 0, 0, 0.90);
+  --element-background-info: rgba(63, 192, 190, 0.60);
 }
 
 
 html, body {
-    margin: 0;
-    padding: 0;
-    font-family: var(--main-font);
-    height: 100%;
-    background-image: var(--main-background-image, linear-gradient(-225deg, #CBBACC 0%, #2580B3 100%));
+  margin: 0;
+  padding: 0;
+  font-family: var(--main-font);
+  height: 100%;
+  background-image: var(--main-background-image, linear-gradient(-225deg, #CBBACC 0%, #2580B3 100%));
+  background-attachment: fixed;
 }
 
 .recbg-default {
-    background-color: var(--element-background, rgba(255, 255, 255, 0.30));
+  background-color: var(--element-background, rgba(255, 255, 255, 0.60));
 }
 
 .recbg-light {
-    background-color: var(--element-background-light, rgba(255, 255, 255, 0.45));
+  background-color: var(--element-background-light, rgba(255, 255, 255, 0.90));
 }
 
 .recbg-dark {
-    background-color: var(--element-background-dark, rgba(0, 0, 0, 0.3));
+  background-color: var(--element-background-dark, rgba(0, 0, 0, 0.60));
 }
 
 .recbg-success {
-    background-color: var(--element-background-success, var(--element-background));
+  background-color: var(--element-background-success, var(--element-background));
 }
 
 .recbg-error {
-    background-color: var(--element-background-error, var(--element-background));
+  background-color: var(--element-background-error, var(--element-background));
 }
 
 .recbg-info {
-    background-color: var(--element-background-info, var(--element-background));
+  background-color: var(--element-background-info, var(--element-background));
 }
 
 .rec-content {
-    min-height: 100vh;
-    background-color: var(--element-background, rgba(255, 255, 255, 0.30));
+  min-height: 100vh;
+  background-color: var(--element-background, rgba(255, 255, 255, 0.60));
 }
 
 .rec-main {
-    min-height: 86vh;
-    display: flex;
-    flex-direction: column;
-    overflow: auto;
+  min-height: 86vh;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
 }
 
 .rec-home-hero {
-    margin: auto 1em;
-    border-radius: 12px;
+  margin: auto 1em;
+  border-radius: 12px;
 }
 
 .rec-footer {
-    min-height: 12vh;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    flex: 1 2 auto;
+  min-height: 12vh;
+  display: flex;
+  flex-direction: column;
+  flex: 1 2 auto;
+}
+.copyright-and-attribution {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .rec-page {
@@ -80,3 +87,4 @@ html, body {
   min-width: 320px;
   height: auto;
 }
+
