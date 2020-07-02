@@ -1,0 +1,146 @@
+@using Recetron.Core.Models
+
+<div class="recipe-view">
+  <article class="recipe-panel recbg-light">
+    <header class="recipe-header">
+      <h2>@Recipe?.Title</h2>
+      @if (Recipe?.ImageUrl != null)
+      {
+        <figure class="recipe-picture">
+          <img class="img-responsive img-fit-cover" src="@Recipe?.ImageUrl" sizes="(max-width: 320px) 312px, 60%" />
+        </figure>
+      }
+      <p>@Recipe?.Description</p>
+      <ul>
+        @if (Recipe?.Ingredients != null)
+        {
+          @foreach (var ingredient in Recipe.Ingredients)
+          {
+            <li>
+              <b>@ingredient.Name</b> - <span>@ingredient.Amount @ingredient.Unit</span>
+            </li>
+          }
+        }
+      </ul>
+    </header>
+    <section class="recipe-nav">
+      <ul class="step">
+        @if (Recipe?.Steps != null)
+        {
+          @foreach (var step in Recipe.Steps.OrderBy(s => s?.Order))
+          {
+            <li class="step-item c-hand">
+              <a @onclick="@(_ => SetStep(step.Order))" class="tooltip" data-tooltip="@step.Directions.Take(10).Aggregate("", (p, n) => p + n)...">Step - @step.Order</a>
+            </li>
+          }
+        }
+      </ul>
+      @if (CurrentStep?.ImageUrl != null)
+      {
+        <figure class="recipe-picture">
+          <img class="img-responsive img-fit-contain" src="@CurrentStep?.ImageUrl" sizes="(max-width: 320px) 312px, 60%" />
+        </figure>
+      }
+      <p>@CurrentStep?.Directions</p>
+    </section>
+    <section class="recipe-footer">
+      @if (Recipe?.Notes != null)
+      {
+        <p>@Recipe.Notes</p>
+      }
+      <button class="btn" disabled="@DisablePrevious" @onclick="@(_ => PreviousStep())">Previous</button>
+      <button class="btn" disabled="@DisableNext" @onclick="@(_ => NextStep())">Next</button>
+    </section>
+  </article>
+
+</div>
+
+<style>
+  .recipe-view {
+    margin: 1em auto;
+  }
+
+  .recipe-panel {
+    padding: 1em;
+    display: grid;
+    grid-template: 'header nav nav' auto 'footer footer footer' auto / 1fr 1fr 1fr;
+  }
+
+  .recipe-header {
+    grid-area: header;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+  }
+
+    .recipe-header .header-section {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-around;
+      align-items: center;
+    }
+
+  .recipe-nav {
+    grid-area: nav;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .recipe-footer {
+    grid-area: footer;
+  }
+
+  .recipe-picture img {
+    max-height: 42vh;
+  }
+
+  @@media(max-width: 768px) {
+    .recipe-panel {
+      grid-template: 'header' auto 'nav' auto 'footer' auto / auto;
+    }
+
+    .recipe-header, .recipe-header .header-section {
+      flex-direction: column;
+    }
+  }
+</style>
+
+@code {
+  [Parameter]
+  public Recipe? Recipe { get; set; }
+
+  private RecipeStep? CurrentStep { get; set; }
+
+  private bool DisablePrevious = true;
+  private bool DisableNext = false;
+
+  protected override void OnParametersSet()
+  {
+    base.OnParametersSet();
+    if (Recipe != null)
+    {
+      SetStep(1);
+    }
+  }
+
+  public void SetStep(int? stepOrder = 1)
+  {
+    CurrentStep = Recipe?.Steps.ElementAtOrDefault((stepOrder ?? 1) - 1);
+    DisablePrevious = CurrentStep?.Order == 1;
+    DisableNext = Recipe?.Steps.LastOrDefault()?.Order == CurrentStep?.Order;
+  }
+
+  public void PreviousStep()
+  {
+    SetStep(CurrentStep?.Order - 1);
+  }
+
+  public void NextStep()
+  {
+    SetStep(CurrentStep?.Order + 1);
+  }
+
+
+}

@@ -1,31 +1,29 @@
 @using Recetron.Core.Models
 
-
 <article class="rec-recipe-form recbg-light">
-
-  @if (isEditing && recipe != null)
+  <nav class="navbar">
+    <section class="navbar-section">
+      <div class="navbar-item">
+        <label class="form-checkbox form-inline">
+          <input type="checkbox" @bind-value="ignorePending" />
+          <i class="form-icon"></i> Ignore pending changes
+        </label>
+      </div>
+    </section>
+    <section class="navbar-section">
+      <button class="btn btn-primary" @onclick="@(_ => TriggerForm())">
+        Save Recipe
+      </button>
+    </section>
+  </nav>
+  @if (showPendingChangesMessage)
   {
-    <nav class="navbar">
-      <section class="navbar-section">
-        <div class="navbar-item">
-          <label class="form-checkbox form-inline">
-            <input type="checkbox" @bind-value="ignorePending" />
-            <i class="form-icon"></i> Ignore pending changes
-          </label>
-        </div>
-      </section>
-      <section class="navbar-section">
-        <button class="btn btn-primary" @onclick="@(_ => TriggerForm())">
-          Save Recipe
-        </button>
-      </section>
-    </nav>
-    @if (showPendingChangesMessage)
-    {
-      <p>
-        You have a pending ingredient or step, please press the <Add /> button or tick the "Ignore pending changes" box above
-      </p>
-    }
+    <p>
+      You have a pending ingredient or step, please press the <Add /> button or tick the "Ignore pending changes" box above
+    </p>
+  }
+  @if (recipe != null)
+  {
     <div class="edit-section">
       <section class="form-section recbg-info">
         <header class="section-header recbg-light">
@@ -114,6 +112,7 @@
           @foreach (var step in recipe.Steps)
           {
             <li class="step-list-item" @key="step!.Order">
+              <input type="url" class="recbg-default ingredient-input name" placeholder="Picture Url" @bind-value="step!.ImageUrl" />
               <textarea class="recbg-default step-text" @bind="step!.Directions"></textarea>
               <span class="c-hand" @onclick="@(_ => DeleteStep(step))"><Trash BackgroundColor="#fff" /></span>
             </li>
@@ -142,13 +141,6 @@
       </section>
     </div>
   }
-  else
-  {
-    <div class="view-section">
-      <section class="recipe-section">
-      </section>
-    </div>
-  }
 </article>
 <style>
   .rec-recipe-form {
@@ -159,6 +151,8 @@
       display: flex;
       flex-direction: row;
       flex-wrap: wrap;
+      justify-content: space-around;
+      justify-content: space-evenly;
     }
 
       .rec-recipe-form .edit-section .form-section {
@@ -188,12 +182,12 @@
     margin: 0;
   }
 
-  .form-section .ingredient-list .ingredient-list-item {
-    display: flex;
-    justify-content: space-around;
-    align-content: center;
-    flex-wrap: wrap;
-  }
+    .form-section .ingredient-list .ingredient-list-item {
+      display: flex;
+      justify-content: space-around;
+      align-content: center;
+      flex-wrap: wrap;
+    }
 
   .form-section .ingredient-group {
     display: flex;
@@ -229,16 +223,12 @@
   private EditContext? MainEditContext;
   private EditContext? IngredientsContext;
   private EditContext? StepsContext;
-  private bool isEditing = false;
   private bool ignorePending = false;
   private bool showPendingChangesMessage = false;
   private Recipe? recipe = null;
 
   private Ingredient NewIngredient = new Ingredient();
   private RecipeStep NewRecipeStep = new RecipeStep() { Order = 1 };
-
-  [Parameter]
-  public bool IsEditing { get => isEditing; set => isEditing = value; }
 
   [Parameter]
   public Recipe? Recipe { get => recipe; set => recipe = value; }
@@ -281,7 +271,8 @@
   {
     recipe!.Steps = recipe!
       .Steps
-      .Where(s => s.Order != step.Order).Select((s, i) =>
+      .Where(s => s.Order != step.Order)
+      .Select((s, i) =>
       {
         s.Order = i + 1;
         return s;
