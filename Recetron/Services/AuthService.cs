@@ -2,8 +2,6 @@ using System;
 using System.Threading.Tasks;
 using Blazored.LocalStorage;
 using JWT;
-using JWT.Builder;
-using JWT.Serializers;
 using Recetron.Interfaces;
 using Recetron.Core.Models;
 using System.Net.Http;
@@ -15,34 +13,35 @@ namespace Recetron.Services
 {
   public class AuthService : IAuthService
   {
-    private readonly ISyncLocalStorageService _localstorage;
-    private readonly HttpClient _http;
-    private readonly IJSRuntime _js;
+    private readonly ISyncLocalStorageService localstorage;
+    private readonly IHttpClientFactory httpFactory;
+    private readonly IJSRuntime js;
 
     public event EventHandler<bool>? AuthStateChanged;
 
     public AuthService(ISyncLocalStorageService localstorage, IHttpClientFactory client, IJSRuntime runtime)
     {
-      _localstorage = localstorage;
-      _js = runtime;
-      _http = client.CreateClient(Constants.AUTH_CLIENT_NAME);
-      _localstorage.Changed += LocalStorageChanged;
+      this.localstorage = localstorage;
+      js = runtime;
+      httpFactory = client;
+      this.localstorage.Changed += LocalStorageChanged;
     }
 
     public bool IsAuthenticated => CheckToken();
 
-    public string Token => _localstorage.GetItem<string>(Constants.ACCESS_TOKEN_NAME);
+    public string Token => localstorage.GetItem<string>(Constants.ACCESS_TOKEN_NAME);
 
     public async Task<bool> LoginAsync(LoginPayload payload)
     {
+      using var http = httpFactory.CreateClient(Constants.AUTH_CLIENT_NAME);
       try
       {
-        var res = await _http.PostAsJsonAsync<LoginPayload>($"{_http.BaseAddress}/login", payload);
+        var res = await http.PostAsJsonAsync($"{http.BaseAddress}/login", payload);
         if (res.IsSuccessStatusCode)
         {
           var auth = await res.Content.ReadFromJsonAsync<AuthResponse>();
-          _localstorage.SetItem(Constants.ACCESS_TOKEN_NAME, auth.Token);
-          _localstorage.SetItem(Constants.USER_DATA_NAME, auth.User);
+          localstorage.SetItem(Constants.ACCESS_TOKEN_NAME, auth.Token);
+          localstorage.SetItem(Constants.USER_DATA_NAME, auth.User);
         }
         else
         {
@@ -61,14 +60,15 @@ namespace Recetron.Services
 
     public async Task<bool> SignupAsync(SignUpPayload payload)
     {
+      using var http = httpFactory.CreateClient(Constants.AUTH_CLIENT_NAME);
       try
       {
-        var res = await _http.PostAsJsonAsync<SignUpPayload>($"{_http.BaseAddress}/signup", payload);
+        var res = await http.PostAsJsonAsync<SignUpPayload>($"{http.BaseAddress}/signup", payload);
         if (res.IsSuccessStatusCode)
         {
           var auth = await res.Content.ReadFromJsonAsync<AuthResponse>();
-          _localstorage.SetItem(Constants.ACCESS_TOKEN_NAME, auth.Token);
-          _localstorage.SetItem(Constants.USER_DATA_NAME, auth.User);
+          localstorage.SetItem(Constants.ACCESS_TOKEN_NAME, auth.Token);
+          localstorage.SetItem(Constants.USER_DATA_NAME, auth.User);
         }
         else
         {
@@ -87,9 +87,9 @@ namespace Recetron.Services
 
     public Task LogoutAsync()
     {
-      _localstorage.RemoveItem(Constants.ACCESS_TOKEN_NAME);
-      _localstorage.RemoveItem(Constants.USER_DATA_NAME);
-      return _js.InvokeVoidAsync("window.location.replace", "/").AsTask();
+      localstorage.RemoveItem(Constants.ACCESS_TOKEN_NAME);
+      localstorage.RemoveItem(Constants.USER_DATA_NAME);
+      return js.InvokeVoidAsync("window.location.replace", "/").AsTask();
     }
 
     private void LocalStorageChanged(object sender, ChangedEventArgs args)
@@ -101,7 +101,7 @@ namespace Recetron.Services
 
     private bool CheckToken()
     {
-      string token = _localstorage.GetItem<string>(Constants.ACCESS_TOKEN_NAME);
+      string token = localstorage.GetItem<string>(Constants.ACCESS_TOKEN_NAME);
       if (token is null || token == "null")
       {
         return false;
