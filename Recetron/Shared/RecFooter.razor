@@ -1,3 +1,39 @@
-﻿<footer class="rec-footer recbg-info">
-    <p>Some Footer &copy; 2020</p>
+@using Recetron.Core.Models;
+
+<footer class="rec-footer recbg-info">
+  <nav class="navbar recbg-light">
+    <section class="navbar-section">
+      <div class="navbar-item">
+        Recetron Made by
+        <a href="https://twitter.com/daniel_tuna" target="_blank" class="btn btn-link">
+          daniel_tuna
+        </a>
+      </div>
+    </section>
+    <section class="navbar-section">
+      <div class="navbar-item">
+        Photo by
+        <a href="@GetUserUrl()" class="btn btn-link">@Picture?.User?.Name</a> on
+        <a href="@GetUnsplashUrl()" class="btn btn-link">Unsplash</a>
+      </div>
+    </section>
+  </nav>
 </footer>
+
+
+@code {
+  [CascadingParameter]
+  private UnsplashPicture? Picture { get; set; }
+
+
+  string GetUserUrl()
+  {
+    return $"https://unsplash.com/@{Picture?.User?.Username}?utm_source=Recetron&utm_medium=referral";
+  }
+
+  string GetUnsplashUrl()
+  {
+    return @"https://unsplash.com/?utm_source=Recetron&utm_medium=referral";
+  }
+
+}
