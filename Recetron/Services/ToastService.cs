@@ -8,13 +8,14 @@ namespace Recetron.Services
   public class ToastService : IToastService
   {
     public event EventHandler<ToastContent>? OnShowToast;
+    public event EventHandler? ClearAllToasts;
 
     public void ShowCustom(ToastContent content)
     {
       OnShowToast?.Invoke(this, content);
     }
 
-    public void ShowError(string title, string content)
+    public void ShowError(string title, string content, int duration = 3500)
     {
       OnShowToast?.Invoke(
         this,
@@ -22,24 +23,13 @@ namespace Recetron.Services
         {
           Title = title,
           Content = content,
-          Kind = Toast.Error
+          Kind = Toast.Error,
+          Duration = duration
         }
       );
     }
 
-    public void ShowNormal(string title, string content)
-    {
-      OnShowToast?.Invoke(
-        this,
-        new ToastContent
-        {
-          Title = title,
-          Content = content
-        }
-      );
-    }
-
-    public void ShowPrimary(string title, string content)
+    public void ShowNormal(string title, string content, int duration = 3500)
     {
       OnShowToast?.Invoke(
         this,
@@ -47,12 +37,12 @@ namespace Recetron.Services
         {
           Title = title,
           Content = content,
-          Kind = Toast.Primary
+          Duration = duration
         }
       );
     }
 
-    public void ShowSuccess(string title, string content)
+    public void ShowPrimary(string title, string content, int duration = 3500)
     {
       OnShowToast?.Invoke(
         this,
@@ -60,7 +50,22 @@ namespace Recetron.Services
         {
           Title = title,
           Content = content,
-          Kind = Toast.Success
+          Kind = Toast.Primary,
+          Duration = duration
+        }
+      );
+    }
+
+    public void ShowSuccess(string title, string content, int duration = 3500)
+    {
+      OnShowToast?.Invoke(
+        this,
+        new ToastContent
+        {
+          Title = title,
+          Content = content,
+          Kind = Toast.Success,
+          Duration = duration
         }
       );
     }
@@ -77,7 +82,7 @@ namespace Recetron.Services
       );
     }
 
-    public void ShowWarning(string title, string content)
+    public void ShowWarning(string title, string content, int duration = 3500)
     {
       OnShowToast?.Invoke(
         this,
@@ -85,7 +90,8 @@ namespace Recetron.Services
         {
           Title = title,
           Content = content,
-          Kind = Toast.Warning
+          Kind = Toast.Warning,
+          Duration = duration
         }
       );
     }
