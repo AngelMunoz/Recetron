@@ -88,3 +88,13 @@ html, body {
   height: auto;
 }
 
+
+.toast-container {
+  position: absolute;
+  right: 2em;
+  top: 2em;
+}
+
+.toast-container .toast-item {
+  margin: 1em auto;
+}

@@ -1,0 +1,60 @@
+@using Recetron.Enums;
+@using Recetron.Interfaces;
+@using Recetron.Models;
+
+@inject IToastService ToastService
+
+@implements IDisposable
+
+<div class="toast-container">
+  @foreach (var item in queue)
+  {
+    if (item.IsShowing)
+    {
+      <div class="toast-item toast @item.KindToString()">
+        <button class="btn btn-clear float-right" @onclick="@(_ => { item.IsShowing = false; StateHasChanged(); })"></button>
+        <h4>@item.Title</h4>
+        @if (item.IsHtml)
+        {
+          @((MarkupString)item.Content)
+        }
+        else
+        {
+          <p>@item.Content</p>
+        }
+      </div>
+    }
+  }
+</div>
+
+
+@code {
+  private Queue<ToastContent> queue = new Queue<ToastContent>();
+  private System.Threading.CancellationTokenSource _cts = new System.Threading.CancellationTokenSource();
+
+
+  protected override void OnInitialized()
+  {
+    ToastService.OnShowToast += EnqueueToast;
+  }
+
+  private void EnqueueToast(object sender, ToastContent content)
+  {
+    queue.Enqueue(content);
+    StateHasChanged();
+    Task.Run(async () =>
+    {
+      await Task.Delay(content.Duration, _cts.Token);
+      queue.Dequeue();
+      StateHasChanged();
+    }, _cts.Token);
+  }
+
+  public void Dispose()
+  {
+    queue.Clear();
+    ToastService.OnShowToast -= EnqueueToast;
+    _cts.Dispose();
+  }
+
+}
