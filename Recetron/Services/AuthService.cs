@@ -50,7 +50,7 @@ namespace Recetron.Services
           return false;
         }
       }
-      catch (System.Exception e)
+      catch (Exception e)
       {
         Console.Error.WriteLine(e.Message);
         return false;
@@ -63,7 +63,7 @@ namespace Recetron.Services
       using var http = httpFactory.CreateClient(Constants.AUTH_CLIENT_NAME);
       try
       {
-        var res = await http.PostAsJsonAsync<SignUpPayload>($"{http.BaseAddress}/signup", payload);
+        var res = await http.PostAsJsonAsync($"{http.BaseAddress}/signup", payload);
         if (res.IsSuccessStatusCode)
         {
           var auth = await res.Content.ReadFromJsonAsync<AuthResponse>();
@@ -129,7 +129,7 @@ namespace Recetron.Services
         }
         if (_exp == null) return true;
       }
-      catch (System.Exception e)
+      catch (Exception e)
       {
         Console.Error.WriteLine($"Check Token Exception: {e.Message} - {e.StackTrace}");
         return false;
