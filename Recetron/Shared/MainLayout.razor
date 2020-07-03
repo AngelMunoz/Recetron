@@ -1,9 +1,10 @@
 @inherits LayoutComponentBase
 
-<article class="rec-content">
-    <RecNavbar />
-    <main class="rec-main">
-        @Body
-    </main>
-    <RecFooter />
-</article>
+<main class="rec-content">
+  <RecNavbar />
+  <article class="rec-main">
+    <ToastComponent />
+    @Body
+  </article>
+  <RecFooter />
+</main>
