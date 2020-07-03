@@ -98,3 +98,7 @@ html, body {
 .toast-container .toast-item {
   margin: 1em auto;
 }
+
+.offline-notice {
+  color: white;
+}

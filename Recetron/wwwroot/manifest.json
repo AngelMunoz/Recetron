@@ -1,0 +1,34 @@
+{
+  "dir": "ltr",
+  "lang": "English",
+  "name": "Recetron",
+  "short_name": "Recetron",
+  "scope": "/",
+  "display": "fullscreen",
+  "start_url": "https://recetron-client.web.app/",
+  "background_color": "transparent",
+  "theme_color": "transparent",
+  "description": "A simple recipe keeper for personal use",
+  "orientation": "any",
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "https://recetron-client.web.app/favicon.ico",
+      "sizes": "16x16 32x32 48x48 64x64"
+    }
+  ],
+  "url": "https://recetron-client.web.app/",
+  "screenshots": [
+    {
+      "src": "[Embedded]",
+      "sizes": "1280x800",
+      "type": "image/png"
+    },
+    {
+      "src": "[Embedded]",
+      "sizes": "750x1334",
+      "type": "image/png"
+    }
+  ]
+}
