@@ -1,8 +1,65 @@
-﻿@page "/"
+@page "/"
+
+@inject Recetron.Interfaces.IToastService ToastService
 
 <section class="rec-page rec-home-hero hero recbg-dark">
   <div class="hero-body text-light">
     <h1>Recetron</h1>
-    <p>Because I just need to learn some Blazor :)</p>
+    <p>
+      Because I just need to learn some Blazor :) <br />
+      Click on the buttons below :)
+    </p>
   </div>
 </section>
+
+<section style="display: flex; flex-direction: row; justify-content: space-evenly; flex-wrap: wrap;">
+  <button class="btn" @onclick="@(_ => ShowCustom())">Show Custom Html</button>
+  <button class="btn" @onclick="@(_ => ShowSimple())">Show Simple</button>
+  <button class="btn" @onclick="@(_ => ShowNormal())">Show Normal</button>
+  <button class="btn" @onclick="@(_ => ShowSuccess())">Show Success</button>
+  <button class="btn" @onclick="@(_ => ShowWarning())">Show Warning</button>
+  <button class="btn btn-primary" @onclick="@(_ => ShowPrimary())">Show Primary</button>
+  <button class="btn btn-error" @onclick="@(_ => ShowError())">Show Error</button>
+</section>
+
+
+@code {
+  private void ShowCustom()
+  {
+    ToastService.ShowCustom(
+      new Models.ToastContent
+      {
+        Title = "Custom content",
+        Content = "<span class=\"badge\">Notifications</ span >",
+        Duration = 6000,
+        IsHtml = true
+      }
+    ); ;
+  }
+  private void ShowSimple()
+  {
+    ToastService.ShowSimple("Hey there :)", Enums.Toast.Warning);
+  }
+  private void ShowNormal()
+  {
+    ToastService.ShowNormal("This is a normal toast", "Toast with not a lot of stuff");
+  }
+  private void ShowPrimary()
+  {
+    ToastService.ShowPrimary("This is a primary toast", "Toast with not a lot of stuff");
+  }
+  private void ShowSuccess()
+  {
+    ToastService.ShowSuccess("This is a success toast", "Toast with not a lot of stuff");
+  }
+  private void ShowWarning()
+  {
+    ToastService.ShowWarning("This is a warning toast", "Toast with not a lot of stuff");
+  }
+  private void ShowError()
+  {
+    ToastService.ShowError("This is a error toast", "Toast with not a lot of stuff");
+  }
+
+
+}
