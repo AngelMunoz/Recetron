@@ -5,6 +5,7 @@
 
 @implements IDisposable
 
+@inject Recetron.Interfaces.IToastService ToastService
 @inject IRecipeService RecipeService
 @inject NavigationManager NavigationManager
 
@@ -17,11 +18,19 @@
       <div class="empty-icon">
         <FoodVariantOff />
       </div>
-      <p class="empty-title h5">There are no recipes here :)</p>
-      <p class="empty-subtitle">CLick to add an empty recipe</p>
-      <div class="empty-action">
-        <button class="btn btn-link" @onclick="@(_ => ShowAddRecipe = !ShowAddRecipe)"><Add /></button>
-      </div>
+      @if (!FailedToGet)
+      {
+        <p class="empty-title h5">There are no recipes here :)</p>
+        <p class="empty-subtitle">Click to add an empty recipe</p>
+        <div class="empty-action">
+          <button class="btn btn-link" @onclick="@(_ => ShowAddRecipe = !ShowAddRecipe)"><Add /></button>
+        </div>
+      }
+      else
+      {
+        <p class="empty-title h5">There was a problem retriving your recipes.</p>
+        <p class="empty-subtitle">Please reload the page :(</p>
+      }
     </div>
   }
   else if (!ShowAddRecipe)
@@ -75,21 +84,21 @@
     justify-content: space-around;
   }
 
-    @@media(max-width: 768px) {
-      .rec-page.recipes .recipes-content {
-          flex-direction: column;
-        }
+  @@media(max-width: 768px) {
+    .rec-page.recipes .recipes-content {
+      flex-direction: column;
     }
+  }
 
-    .rec-page.recipes .recipes-content .tile-list {
-      display: flex;
-      flex-direction: row;
-      justify-content: space-around;
-      flex-wrap: wrap;
-      list-style: none;
-      margin: 0;
-      padding: 0;
-    }
+  .rec-page.recipes .recipes-content .tile-list {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
 
     .rec-page.recipes .recipes-content .tile-list .tile {
       width: 268px;
@@ -104,24 +113,57 @@
   private bool ShowAddRecipe { get; set; } = false;
   private readonly CancellationTokenSource _cts = new CancellationTokenSource();
   private PaginationResult<Recipe> recipes { get; set; } = new PaginationResult<Recipe>();
+  private bool FailedToGet { get; set; } = false;
 
   private Recipe NewRecipe = new Recipe();
 
   protected override async Task OnInitializedAsync()
   {
-    recipes = await RecipeService.Find(Page, Limit, _cts.Token);
+    try
+    {
+      recipes = await RecipeService.Find(Page, Limit, _cts.Token);
+    }
+    catch (Exception e)
+    {
+      FailedToGet = true;
+      Console.Error.WriteLine($"We could not retrieve the recipes: {e.Message} - {e.StackTrace}");
+      var msg = $"There was a problem trying to retrieve your recipes, please refresh the page and try again";
+      ToastService.ShowError("Failed to retrieve the recipes", msg, 6000);
+    }
   }
 
 
   private async void SaveNewRecipe(Recipe? recipe)
   {
     if (recipe == null) return;
+    try
+    {
+      await RecipeService.Create(recipe, _cts.Token);
+      ToastService.ShowSuccess("Success", "Information saved successfuly", 6000);
+    }
+    catch (Exception e)
+    {
+      FailedToGet = true;
+      Console.Error.WriteLine($"We could not save the recipe: {e.Message} - {e.StackTrace}");
+      var msg = $"There was a problem trying to save your recipe, please refresh the page and try again";
+      ToastService.ShowError("Failed to save the recipe", msg, 6000);
+      return;
+    }
 
-    var saved = await RecipeService.Create(recipe, _cts.Token);
-    recipes = await RecipeService.Find(Page, Limit, _cts.Token);
-    NewRecipe = new Recipe();
-    ShowAddRecipe = false;
-    StateHasChanged();
+    try
+    {
+      recipes = await RecipeService.Find(Page, Limit, _cts.Token);
+      NewRecipe = new Recipe();
+      ShowAddRecipe = false;
+      StateHasChanged();
+    }
+    catch (Exception e)
+    {
+      FailedToGet = true;
+      Console.Error.WriteLine($"We could not retrieve the recipes: {e.Message} - {e.StackTrace}");
+      var msg = $"There was a problem trying to retrieve your recipes, please refresh the page and try again";
+      ToastService.ShowError("Failed to retrieve the recipes", msg, 6000);
+    }
   }
 
   private void NavigateToRecipe(string? recipeId)
@@ -131,8 +173,19 @@
 
   public void Dispose()
   {
-    _cts.Cancel();
-    _cts.Dispose();
+    try
+    {
+      _cts.Cancel();
+      _cts.Dispose();
+    }
+    catch (ObjectDisposedException e)
+    {
+      Console.Error.WriteLine($"The token source may be disposed already: {e.Message} - {e.StackTrace}");
+    }
+    catch (AggregateException e)
+    {
+      Console.Error.WriteLine($"Failed to Cancel: {e.Message} - {e.StackTrace}");
+    }
   }
 
 }

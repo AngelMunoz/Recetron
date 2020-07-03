@@ -10,12 +10,16 @@
         </a>
       </div>
     </section>
+    <section class="navbar-center"></section>
     <section class="navbar-section">
-      <div class="navbar-item">
-        Photo by
-        <a href="@GetUserUrl()" class="btn btn-link">@Picture?.User?.Name</a> on
-        <a href="@GetUnsplashUrl()" class="btn btn-link">Unsplash</a>
-      </div>
+      @if (Picture != null)
+      {
+        <div class="navbar-item">
+          Photo by
+          <a href="@GetUserUrl()" class="btn btn-link">@Picture?.User?.Name</a> on
+          <a href="@GetUnsplashUrl()" class="btn btn-link">Unsplash</a>
+        </div>
+      }
     </section>
   </nav>
 </footer>

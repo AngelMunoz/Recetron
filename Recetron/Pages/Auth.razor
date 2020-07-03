@@ -1,14 +1,18 @@
 @page "/auth"
+
 @using Recetron.Core.Models
 @using Recetron.Interfaces
+
+@inject IToastService ToastService
 @inject IAuthService AuthService
 @inject NavigationManager Nav
 
 
 
+
 <section class="rec-page rec-auth recbg-light">
   <h1 class="text-center">Welcome</h1>
-  <ul class="tab tab-block" >
+  <ul class="tab tab-block">
     <li class="tab-item @(@IsActive("login") ? "active" : "")">
       <a @onclick="@(_ => @SetActiveTab("login"))">Login</a>
     </li>
@@ -17,7 +21,8 @@
     </li>
   </ul>
 
-  @if(@ActiveTab == "login") {
+  @if (@ActiveTab == "login")
+  {
     <EditForm Model="@loginPayload" OnValidSubmit="SubmitLogin">
       <DataAnnotationsValidator />
       <ValidationSummary />
@@ -27,17 +32,20 @@
       </section>
       <section class="form-group">
         <label for="password" class="form-label">Password</label>
-        <InputText type="password" class="form-input"  @bind-Value="loginPayload.Password" placeholder="Password" />
+        <InputText type="password" class="form-input" @bind-Value="loginPayload.Password" placeholder="Password" />
       </section>
       <section class="form-group">
         <button class="btn">Send</button>
       </section>
     </EditForm>
-  } else {
+  }
+  else
+  {
     <EditForm Model="@signUpPayload" OnValidSubmit="SubmitSignUp">
       <DataAnnotationsValidator />
       <ValidationSummary />
-      @if(passwordError != null) {
+      @if (passwordError != null)
+      {
         <ul class="validation-errors">
           <li class="validation-message">Passwords do not match</li>
         </ul>
@@ -56,11 +64,11 @@
       </section>
       <section class="form-group">
         <label for="password" class="form-label">Password</label>
-        <InputText type="password" class="form-input"  @bind-Value="signUpPayload.Password" placeholder="Password" />
+        <InputText type="password" class="form-input" @bind-Value="signUpPayload.Password" placeholder="Password" />
       </section>
       <section class="form-group">
         <label for="repeatPassword" class="form-label">Repeat Password</label>
-        <InputText type="password" name="repeatPassword" class="form-input"  @bind-Value="@repeatPassword" placeholder="Password" />
+        <InputText type="password" name="repeatPassword" class="form-input" @bind-Value="@repeatPassword" placeholder="Password" />
       </section>
       <section class="form-group">
         <button class="btn">Send</button>
@@ -85,11 +93,22 @@
   {
     try
     {
-      await AuthService.LoginAsync(loginPayload);
+      var success = await AuthService.LoginAsync(loginPayload);
+      if (success)
+      {
+        Nav.NavigateTo("/recipes", true);
+      }
+      else
+      {
+        var msg = $"We could not log you in please check your email and password";
+        ToastService.ShowError("Unable to Log in", msg, 6000);
+      }
     }
     catch (System.Exception e)
     {
       Console.Error.WriteLine($"Failed to Login: {e.Message} - {e.StackTrace}");
+      var msg = $"We could not log you in please check your email and password";
+      ToastService.ShowError("Unable to Log in", msg, 6000);
     }
   }
 
@@ -107,11 +126,22 @@
     }
     try
     {
-      await AuthService.SignupAsync(signUpPayload);
+      var success = await AuthService.SignupAsync(signUpPayload);
+      if (success)
+      {
+        Nav.NavigateTo("/recipes", true);
+      }
+      else
+      {
+        var msg = $"We could not sign you up in please check you provided all of the information, the server may be down";
+        ToastService.ShowError("Unable to Sign up", msg, 6000);
+      }
     }
     catch (System.Exception e)
     {
       Console.Error.WriteLine($"Failed to Login: {e.Message} - {e.StackTrace}");
+      var msg = $"We could not sign you up in please check you provided all of the information, the server may be down";
+      ToastService.ShowError("Unable to Sign up", msg, 6000);
     }
   }
 

@@ -36,25 +36,63 @@
   protected override void OnInitialized()
   {
     ToastService.OnShowToast += EnqueueToast;
+    ToastService.ClearAllToasts += ClearToasts;
   }
 
   private void EnqueueToast(object sender, ToastContent content)
   {
     queue.Enqueue(content);
     StateHasChanged();
-    Task.Run(async () =>
+    try
     {
-      await Task.Delay(content.Duration, _cts.Token);
-      queue.Dequeue();
-      StateHasChanged();
-    }, _cts.Token);
+      Task.Run(async () =>
+      {
+        try
+        {
+          await Task.Delay(content.Duration, _cts.Token);
+          queue.Dequeue();
+          StateHasChanged();
+        }
+        catch (TaskCanceledException e)
+        {
+          Console.Error.WriteLine($"Task Has been Cancelled: {e.Message} - {e.StackTrace}");
+        }
+        catch (InvalidOperationException e)
+        {
+          Console.Error.WriteLine($"Failed to Dequeue, queue may be already empty?: {e.Message} - {e.StackTrace}");
+        }
+      }, _cts.Token);
+    }
+    catch (TaskCanceledException e)
+    {
+      Console.Error.WriteLine($"Task Has been Cancelled: {e.Message} - {e.StackTrace}");
+    }
+  }
+
+  private void ClearToasts(object sender, object args)
+  {
+    _cts.Cancel();
+    queue.Clear();
   }
 
   public void Dispose()
   {
-    queue.Clear();
     ToastService.OnShowToast -= EnqueueToast;
-    _cts.Dispose();
+    ToastService.ClearAllToasts -= ClearToasts;
+    queue.Clear();
+    try
+    {
+      _cts.Cancel();
+      _cts.Dispose();
+    }
+    catch (ObjectDisposedException e)
+    {
+      Console.Error.WriteLine($"The token source may be disposed already: {e.Message} - {e.StackTrace}");
+    }
+    catch (AggregateException e)
+    {
+      Console.Error.WriteLine($"Failed to Cancel: {e.Message} - {e.StackTrace}");
+    }
   }
 
 }

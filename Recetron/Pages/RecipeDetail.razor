@@ -5,6 +5,7 @@
 
 @implements IDisposable
 
+@inject Recetron.Interfaces.IToastService ToastService
 @inject IRecipeService RecipeService
 @inject NavigationManager NavService
 
@@ -62,6 +63,7 @@
     display: flex;
     flex-direction: column;
   }
+
   .delete-propmpt-panel {
     align-self: center;
     margin: 0.5em;
@@ -82,34 +84,78 @@
   protected override async Task OnParametersSetAsync()
   {
     await base.OnParametersSetAsync();
-    recipe = await RecipeService.FindOne(RecipeId ?? "", _cts.Token);
+    try
+    {
+      recipe = await RecipeService.FindOne(RecipeId ?? "", _cts.Token);
+    }
+    catch (Exception e)
+    {
+      Console.Error.WriteLine($"We could not get the Recipe with id: {RecipeId}: {e.Message} - {e.StackTrace}");
+      var msg = $"There was a problem trying to get your recipe, please refresh the page";
+      ToastService.ShowError("Failed to retrieve the recipe", msg, 6000);
+    }
   }
 
   private async void SaveRecipe(Recipe recipe)
   {
-    var result = await RecipeService.Update(recipe, _cts.Token);
-    if (!result)
+    try
     {
-      Console.WriteLine($"Could not update the Recipe with id {recipe.Id}");
+      var result = await RecipeService.Update(recipe, _cts.Token);
+      if (!result)
+      {
+        var msg = $"While we could reach the server, check that you have filled all the fields in your ingredients and steps.";
+        ToastService.ShowWarning("Failed to update the recipe", msg, 6000);
+        ToastService.ShowWarning("Notice", "Saving without modifying also triggers this warning");
+        return;
+      }
+      ToastService.ShowSuccess("Success", "Information saved successfuly", 6000);
+    }
+    catch (Exception e)
+    {
+      Console.Error.WriteLine($"We could not update the Recipe with id: {RecipeId}: {e.Message} - {e.StackTrace}");
+      var msg = $"There was a problem trying to update your recipe, please refresh the page and try again";
+      ToastService.ShowError("Failed to update the recipe", msg, 6000);
     }
   }
 
   private async void DeleteRecipe()
   {
-    var success = await RecipeService.Destroy(recipe!.Id!);
-    if (success)
+    try
     {
-      NavService.NavigateTo("/recipes");
+      var success = await RecipeService.Destroy(recipe!.Id!, _cts.Token);
+      if (success)
+      {
+        NavService.NavigateTo("/recipes");
+      }
+      else
+      {
+        var msg = $"While we could reach the server, we were unable to delete the recipe, please reload the page and try again.";
+        ToastService.ShowWarning("Failed to delete the recipe", msg, 6000);
+      }
     }
-    else
+    catch (Exception e)
     {
-      Console.WriteLine($"Could not Delete Recipe with id: {recipe?.Id}");
+      Console.Error.WriteLine($"We could not delete the Recipe with id: {RecipeId}: {e.Message} - {e.StackTrace}");
+      var msg = $"There was a problem trying to delete your recipe, please refresh the page and try again";
+      ToastService.ShowError("Failed to delete the recipe", msg, 6000);
     }
   }
 
   public void Dispose()
   {
-    _cts.Dispose();
+    try
+    {
+      _cts.Cancel();
+      _cts.Dispose();
+    }
+    catch (ObjectDisposedException e)
+    {
+      Console.Error.WriteLine($"The token source may be disposed already: {e.Message} - {e.StackTrace}");
+    }
+    catch (AggregateException e)
+    {
+      Console.Error.WriteLine($"Failed to Cancel: {e.Message} - {e.StackTrace}");
+    }
   }
 
 }
