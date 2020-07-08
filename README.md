@@ -12,6 +12,16 @@ This is a simple playground with a "full-stack" C# web application using [Blazor
 
 If I ever finish this project (will update this line) it will be somewhat a recipe keeper I plan to host it on [Firebase], [Heroku] and [MongoDB Atlas]
 
+> ### Updated opinion so far?
+>
+> Blazor it's somewhat a csharpilized react? it feels react'ish on some parts and even angular'ish on others but this is for sure made for C# devs as a primarily Javascript dev  I feel like I'm writing a lot of code for moreless the same result if I add typescript I can start getting typesafety without losing the vast javascript ecosystem where a lot  of the problems of the web are likely to be solved and not "yet to be discover"
+>
+> - I like it but I still need to do more work with it to see if I could actually swap it for Javascript
+
+
+> ### Updated opinion so far x2?
+>
+> I've been playing with [Bolero](https://fsbolero.io) as well which is an F# version built on top of Blazor and this is quite an experience. Blazor by itself doesn't really give me too much benefits compared to other UI frameworks you can always argue that Fullstack Javascript/Typescript is somewhat equivalent to Fullstack C#/F# so depending on your needs you might or might not get any advantage by choosing one or another tool. Either F# or C# actually work nicely and after some time using and practicing with Blazor/Bolero I feel you can actually start trying to go FullStack C#/F# in production apps if you want to check the F# version you can do so [Here](https://github.com/AngelMunoz/Frandadin) with C# I'm worrying most of the time about runtime errors and unexplicable stack traces in the case of F# I don't worry about runtime stuff but rather amount of time spent on fitting nicely into MVU architecture in the end I think both timewise match up with F# getting an edge for correctness... So yeah! I Like Blazor/Bolero and I could actually start leaving some Javascript work (not everything) behind over this depending on the project and requirements :)
 
 ## Development
 Just clone and add your `appsettings.Development.json` to your `wwwroot` directory on the web project to add your local values like your local API (if you're working with other API)
@@ -217,9 +227,3 @@ public class MyType
 ```
 that allows you to analyze a complex type graph as long as it has data annotations but it's not released yet I guess for the moment I'd drop EditForms completely and rely on `FluentValidator` since I'm already using that to validate the backend models before processing them on their respective endpoints I'd argue that you should be able to share the Abstract Validators between client/server
 
-
-### Updated opinion so far?
-
-Blazor it's somewhat a csharpilized react? it feels react'ish on some parts and even angular'ish on others but this is for sure made for C# devs as a primarily Javascript dev I feel like I'm writing a lot of code for moreless the same result if I add typescript I can start getting typesafety without losing the vast javascript ecosystem where a lot of the problems of the web are likely to be solved and not "yet to be discover"
-
-- I like it but I still need to do more work with it to see if I could actually swap it for Javascript
