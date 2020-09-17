@@ -23,7 +23,7 @@
       "request": "launch",
       "preLaunchTask": "build",
       // If you have changed target frameworks, make sure to update the program path.
-      "program": "${workspaceFolder}/Recetron.Api/bin/Debug/net5.0/Recetron.Api.dll",
+      "program": "${workspaceFolder}/Recetron.Api/bin/Debug/netcoreapp3.1/Recetron.Api.dll",
       "args": [],
       "cwd": "${workspaceFolder}/Recetron.Api",
       // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
