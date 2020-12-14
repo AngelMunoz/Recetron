@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BCrypt.Net-Next" Version="4.0.0" />
+    <PackageReference Include="BCrypt.Net-Next" Version="4.0.2" />
     <PackageReference Include="Carter" Version="5.2.0" />
     <PackageReference Include="FluentValidation" Version="9.2.2" />
     <PackageReference Include="MongoDB.Driver" Version="2.11.5" />
