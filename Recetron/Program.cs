@@ -37,8 +37,8 @@ namespace Recetron
         {
           client.BaseAddress = new Uri($"{baseApiUrl}/api");
           var sfactory = sp.GetService<IServiceScopeFactory>();
-          using var scope = sfactory.CreateScope();
-          var auth = scope.ServiceProvider.GetService<IAuthService>();
+          using var scope = sfactory?.CreateScope();
+          var auth = scope?.ServiceProvider.GetService<IAuthService>();
           var token = auth?.Token;
           if (token == null) { return; }
           client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
