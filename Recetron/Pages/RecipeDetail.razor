@@ -5,18 +5,18 @@
 
 @implements IDisposable
 
-@inject Recetron.Interfaces.IToastService ToastService
-@inject IRecipeService RecipeService
-@inject NavigationManager NavService
+@inject Interfaces.IToastService _toastService
+@inject IRecipeService _recipeService
+@inject NavigationManager _navService
 
 <article class="rec-page recipe-detail recbg-light">
   <nav class="navbar recbg-light">
     <section class="navbar-section">
-      <a class="btn btn-link">@recipe?.Title</a>
+      <a class="btn btn-link">@Recipe?.Title</a>
     </section>
     <section class="navbar-section">
-      <a class="btn btn-link" @onclick="@(_ => IsEditing = !IsEditing)">
-        @if (IsEditing)
+      <a class="btn btn-link" @onclick="@(_ => _isEditing = !_isEditing)">
+        @if (_isEditing)
         {
           <Cancel />
         }
@@ -25,16 +25,16 @@
           <Pencil />
         }
       </a>
-      <a class="btn btn-link" @onclick="@(_ => IsDeleting = true)">
+      <a class="btn btn-link" @onclick="@(_ => _isDeleting = true)">
         <Trash />
       </a>
     </section>
   </nav>
-  @if (IsDeleting)
+  @if (_isDeleting)
   {
     <div class="panel recbg-info delete-propmpt-panel">
       <div class="panel-header">
-        <div class="panel-title">Delete &quot;@recipe?.Title&quot;</div>
+        <div class="panel-title">Delete &quot;@Recipe?.Title&quot;</div>
       </div>
       <div class="panel-body">
         <p>
@@ -44,18 +44,18 @@
       </div>
       <div class="panel-footer">
         <button class="btn" @onclick="@(_ => DeleteRecipe())">Yes, Delete</button>
-        <button class="btn btn-primary" @onclick="@(_ => IsDeleting = false)">No, Cancel</button>
+        <button class="btn btn-primary" @onclick="@(_ => _isDeleting = false)">No, Cancel</button>
       </div>
     </div>
   }
 
-  @if (IsEditing && recipe != null)
+  @if (_isEditing && Recipe != null)
   {
-    <RecipeForm Recipe="recipe" OnSaveRecipe="SaveRecipe" />
+    <RecipeForm Recipe="Recipe" OnSaveRecipe="SaveRecipe" />
   }
   else
   {
-    <RecipeView Recipe="recipe" />
+    <RecipeView Recipe="Recipe" />
   }
 </article>
 <style>
@@ -74,10 +74,10 @@
   [Parameter]
   public string? RecipeId { get; set; }
 
-  private Recipe? recipe { get; set; }
+  private Recipe? Recipe { get; set; }
 
-  private bool IsEditing = false;
-  private bool IsDeleting = false;
+  private bool _isEditing = false;
+  private bool _isDeleting = false;
 
   private readonly CancellationTokenSource _cts = new CancellationTokenSource();
 
@@ -86,35 +86,36 @@
     await base.OnParametersSetAsync();
     try
     {
-      recipe = await RecipeService.FindOne(RecipeId ?? "", _cts.Token);
+      Recipe = await _recipeService.FindOne(RecipeId ?? "", _cts.Token);
     }
     catch (Exception e)
     {
       Console.Error.WriteLine($"We could not get the Recipe with id: {RecipeId}: {e.Message} - {e.StackTrace}");
       var msg = $"There was a problem trying to get your recipe, please refresh the page";
-      ToastService.ShowError("Failed to retrieve the recipe", msg, 6000);
+      _toastService.ShowError("Failed to retrieve the recipe", msg, 6000);
     }
   }
 
-  private async void SaveRecipe(Recipe recipe)
+  private async void SaveRecipe(Recipe? recipe)
   {
+    if (recipe is null) return;
     try
     {
-      var result = await RecipeService.Update(recipe, _cts.Token);
+      var result = await _recipeService.Update(recipe, _cts.Token);
       if (!result)
       {
         var msg = $"While we could reach the server, check that you have filled all the fields in your ingredients and steps.";
-        ToastService.ShowWarning("Failed to update the recipe", msg, 6000);
-        ToastService.ShowWarning("Notice", "Saving without modifying also triggers this warning");
+        _toastService.ShowWarning("Failed to update the recipe", msg, 6000);
+        _toastService.ShowWarning("Notice", "Saving without modifying also triggers this warning");
         return;
       }
-      ToastService.ShowSuccess("Success", "Information saved successfuly", 6000);
+      _toastService.ShowSuccess("Success", "Information saved successfuly", 6000);
     }
     catch (Exception e)
     {
       Console.Error.WriteLine($"We could not update the Recipe with id: {RecipeId}: {e.Message} - {e.StackTrace}");
       var msg = $"There was a problem trying to update your recipe, please refresh the page and try again";
-      ToastService.ShowError("Failed to update the recipe", msg, 6000);
+      _toastService.ShowError("Failed to update the recipe", msg, 6000);
     }
   }
 
@@ -122,22 +123,22 @@
   {
     try
     {
-      var success = await RecipeService.Destroy(recipe!.Id!, _cts.Token);
+      var success = await _recipeService.Destroy(Recipe!.Id!, _cts.Token);
       if (success)
       {
-        NavService.NavigateTo("/recipes");
+        _navService.NavigateTo("/recipes");
       }
       else
       {
         var msg = $"While we could reach the server, we were unable to delete the recipe, please reload the page and try again.";
-        ToastService.ShowWarning("Failed to delete the recipe", msg, 6000);
+        _toastService.ShowWarning("Failed to delete the recipe", msg, 6000);
       }
     }
     catch (Exception e)
     {
       Console.Error.WriteLine($"We could not delete the Recipe with id: {RecipeId}: {e.Message} - {e.StackTrace}");
       var msg = $"There was a problem trying to delete your recipe, please refresh the page and try again";
-      ToastService.ShowError("Failed to delete the recipe", msg, 6000);
+      _toastService.ShowError("Failed to delete the recipe", msg, 6000);
     }
   }
 

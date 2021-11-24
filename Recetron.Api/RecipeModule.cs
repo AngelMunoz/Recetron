@@ -1,160 +1,115 @@
 using System.Linq;
-using Carter;
-using Carter.ModelBinding;
-using Carter.Request;
-using Carter.Response;
-using MongoDB.Bson;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
 using Recetron.Api.Interfaces;
 using Recetron.Core.Interfaces;
 using Recetron.Core.Models;
+using Carter;
+using Carter.ModelBinding;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Recetron.Api
 {
-  public class RecipeModule : CarterModule
+  public class RecipeModule : ICarterModule
   {
-    public RecipeModule(IAuthService _auth, IRecipeService _recipes)
-      : base("/api/recipes")
+    [Authorize]
+    private async Task<IResult> OnFindAllRecipes(IRecipeService _recipes, IAuthService _auth, HttpRequest req)
     {
-      this.Before = ctx => ModuleHelpers.VerifyJwt(ctx, _auth);
-      Get("", async (req, res) =>
+      var user = await _auth.ExtractUserAsync(ModuleHelpers.ExtractTokenStr(req.HttpContext));
+      if (user is null)
       {
-        var user = await _auth.ExtractUserAsync(ModuleHelpers.ExtractTokenStr(req.HttpContext));
-        if (user == null)
-        {
-          res.StatusCode = 422;
-          await res.Negotiate(new ErrorResponse { Message = "Missing User from Token" });
-          return;
-        }
-        var _page = req.Query.FirstOrDefault(f => f.Key == "page").Value.FirstOrDefault();
-        var _limit = req.Query.FirstOrDefault(f => f.Key == "limit").Value.FirstOrDefault();
-        var (page, limit) = ModuleHelpers.GetPagination(_page, _limit);
-        var recipes = await _recipes.FindByUser(user.Id ?? string.Empty, page, limit);
-        await res.Negotiate(recipes);
-        return;
-      });
-      
-      Get("/{id}", async (req, res) =>
+        return Results.UnprocessableEntity(new ErrorResponse("Missing User from Token"));
+      }
+
+      var _page = req?.Query?.FirstOrDefault(f => f.Key == "page").Value.FirstOrDefault();
+      var _limit = req?.Query?.FirstOrDefault(f => f.Key == "limit").Value.FirstOrDefault();
+      var (page, limit) = ModuleHelpers.GetPagination(_page, _limit);
+      var recipes = await _recipes.FindByUser(user.Id ?? string.Empty, page, limit);
+      return Results.Ok(recipes);
+    }
+
+    [Authorize]
+    private async Task<IResult> OnFineOneRecipe(string id, IRecipeService _recipes, IAuthService _auth, HttpContext ctx)
+    {
+      var recipe = await _recipes.FindOne(id);
+      var user = await _auth.ExtractUserAsync(ModuleHelpers.ExtractTokenStr(ctx));
+      return recipe?.UserId != user?.Id ? Results.Forbid() : Results.Ok(recipe);
+    }
+
+    [Authorize]
+    public async Task<IResult> OnCreateRecipe(Recipe payload, IRecipeService _recipes, IAuthService _auth,
+      HttpContext ctx)
+    {
+      var user = await _auth.ExtractUserAsync(ModuleHelpers.ExtractTokenStr(ctx));
+      if (user?.Id is null)
       {
-        var strId = req.RouteValues.As<string>("id");
-        var recipe = await _recipes.FindOne(strId);
-        var user = await _auth.ExtractUserAsync(ModuleHelpers.ExtractTokenStr(req.HttpContext));
-        if (recipe?.UserId != user?.Id)
-        {
-          res.StatusCode = 403;
-          await res.Negotiate(
-            new ErrorResponse
-            {
-              Message = "You don't have access to this recipe",
-            }
-          );
-          return;
-        }
+        return Results.UnprocessableEntity(new ErrorResponse("Missing User from Token"));
+      }
 
-        await res.Negotiate(recipe);
-      });
-
-      Post("", async (req, res) =>
+      var result = ctx.Request.Validate(payload);
+      if (!result.IsValid)
       {
-        var user = await _auth.ExtractUserAsync(ModuleHelpers.ExtractTokenStr(req.HttpContext));
-        if (user?.Id == null)
-        {
-          res.StatusCode = 422;
-          await res.Negotiate(new ErrorResponse { Message = "Missing User from Token" });
-          return;
-        }
+        return Results.BadRequest(new ErrorResponse("Failed Validation") { Errors = result.GetFormattedErrors() });
+      }
 
-        var (validationResult, payload) = await req.BindAndValidate<Recipe>();
-        if (!validationResult.IsValid)
-        {
-          res.StatusCode = 400;
-          await res.Negotiate(
-            new ErrorResponse
-            {
-              Message = "Failed Validation",
-              Errors = validationResult.GetFormattedErrors()
-            }
-          );
-          return;
-        }
-        payload.UserId = user.Id;
-        var recipe = await _recipes.Create(payload);
+      var recipe = await _recipes.Create(payload with { UserId = user.Id });
 
-        res.StatusCode = 201;
-        await res.Negotiate(recipe);
-      });
+      return Results.Created($"/api/recipes/{recipe.Id}", recipe);
+    }
 
-      Put("", async (req, res) =>
+    [Authorize]
+    private async Task<IResult> OnEditRecipe(Recipe recipe, IAuthService _auth, IRecipeService _recipes,
+      HttpContext ctx)
+    {
+      var user = await _auth.ExtractUserAsync(ModuleHelpers.ExtractTokenStr(ctx));
+      if (user?.Id is null)
       {
-        var user = await _auth.ExtractUserAsync(ModuleHelpers.ExtractTokenStr(req.HttpContext));
-        if (user?.Id == null)
-        {
-          res.StatusCode = 422;
-          await res.Negotiate(new ErrorResponse { Message = "Missing User from Token" });
-          return;
-        }
+        return Results.UnprocessableEntity(new ErrorResponse("Missing User from Token"));
+      }
 
-        var (validationResult, recipe) = await req.BindAndValidate<Recipe>();
-        if (!validationResult.IsValid)
-        {
-          res.StatusCode = 400;
-          await res.Negotiate(
-            new ErrorResponse
-            {
-              Message = "Failed Validation",
-              Errors = validationResult.GetFormattedErrors()
-            }
-          );
-          return;
-        }
-        
-        if (recipe.UserId != user.Id)
-        {
-          res.StatusCode = 403;
-          await res.Negotiate(
-            new ErrorResponse
-            {
-              Message = "You don't have access to this recipe",
-            }
-          );
-          return;
-        }
-  
-        var didUpdate = await _recipes.Update(recipe);
-        await res.Negotiate(didUpdate);
-      });
-
-      Delete("/{id}", async (req, res) =>
+      var validationResult = ctx.Request.Validate(recipe);
+      if (!validationResult.IsValid)
       {
-        var strId = req.RouteValues.As<string>("id");
-        var recipe = await _recipes.FindOne(strId);
-        var user = await _auth.ExtractUserAsync(ModuleHelpers.ExtractTokenStr(req.HttpContext));
-        if (recipe.UserId != user?.Id)
+        return Results.BadRequest(new ErrorResponse("Failed Validation")
         {
-          res.StatusCode = 403;
-          await res.Negotiate(
-            new ErrorResponse
-            {
-              Message = "You don't have access to this recipe",
-            }
-          );
-          return;
-        }
+          Errors = validationResult.GetFormattedErrors()
+        });
+      }
 
-        var didDestroy = await _recipes.Destroy(strId);
-        if (!didDestroy)
-        {
-          res.StatusCode = 422;
-          await res.Negotiate(
-            new ErrorResponse
-            {
-              Message = "Failed To Delete This Recipe",
-            }
-          );
-          return;
-        }
+      if (recipe.UserId != user.Id)
+      {
+        return Results.Forbid();
+      }
 
-        res.StatusCode = 204;
-      });
+      var didUpdate = await _recipes.Update(recipe);
+      return Results.Ok(didUpdate);
+    }
+
+    [Authorize]
+    public async Task<IResult> OnDeleteRecipe(string id, IAuthService _auth, IRecipeService _recipes, HttpContext ctx)
+    {
+      var recipe = await _recipes.FindOne(id);
+      var user = await _auth.ExtractUserAsync(ModuleHelpers.ExtractTokenStr(ctx));
+      if (recipe.UserId != user?.Id)
+      {
+        return Results.Forbid();
+      }
+
+      var didDestroy = await _recipes.Destroy(id);
+      return didDestroy
+        ? Results.NoContent()
+        : Results.UnprocessableEntity(new ErrorResponse("Failed To Delete This Recipe"));
+    }
+
+    public void AddRoutes(IEndpointRouteBuilder app)
+    {
+      app.MapGet("/api/recipes", OnFindAllRecipes);
+      app.MapGet("/api/recipes/{id}", OnFineOneRecipe);
+      app.MapPost("/api/recipes", OnCreateRecipe);
+      app.MapPut("/api/recipes", OnEditRecipe);
+      app.MapDelete("/api/recipes/{id}", OnDeleteRecipe);
     }
   }
 }

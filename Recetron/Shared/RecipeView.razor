@@ -7,7 +7,7 @@
       @if (Recipe?.ImageUrl != null)
       {
         <figure class="recipe-picture">
-          <img class="img-responsive img-fit-cover" src="@Recipe?.ImageUrl" sizes="(max-width: 320px) 312px, 60%" />
+          <img alt="@Recipe?.ImageUrl" class="img-responsive img-fit-cover" src="@Recipe?.ImageUrl" sizes="(max-width: 320px) 312px, 60%" />
         </figure>
       }
       <p>@Recipe?.Description</p>
@@ -30,7 +30,7 @@
           @foreach (var step in Recipe.Steps.OrderBy(s => s?.Order))
           {
             <li class="step-item c-hand">
-              <a @onclick="@(_ => SetStep(step.Order))" class="tooltip" data-tooltip="@step.Directions.Take(10).Aggregate("", (p, n) => p + n)...">Step - @step.Order</a>
+              <a @onclick="@(_ => SetStep(step.Order))" class="tooltip" data-tooltip="@step?.Directions?.Take(10).Aggregate("", (p, n) => p + n)...">Step - @step?.Order</a>
             </li>
           }
         }
@@ -38,7 +38,7 @@
       @if (CurrentStep?.ImageUrl != null)
       {
         <figure class="recipe-picture">
-          <img class="img-responsive img-fit-contain" src="@CurrentStep?.ImageUrl" sizes="(max-width: 320px) 312px, 60%" />
+          <img alt="@CurrentStep?.ImageUrl" class="img-responsive img-fit-contain" src="@CurrentStep?.ImageUrl" sizes="(max-width: 320px) 312px, 60%" />
         </figure>
       }
       <p>@CurrentStep?.Directions</p>
@@ -48,8 +48,8 @@
       {
         <p>@Recipe.Notes</p>
       }
-      <button class="btn" disabled="@DisablePrevious" @onclick="@(_ => PreviousStep())">Previous</button>
-      <button class="btn" disabled="@DisableNext" @onclick="@(_ => NextStep())">Next</button>
+      <button class="btn" disabled="@_disablePrevious" @onclick="@(_ => PreviousStep())">Previous</button>
+      <button class="btn" disabled="@_disableNext" @onclick="@(_ => NextStep())">Next</button>
     </section>
   </article>
 
@@ -113,8 +113,8 @@
 
   private RecipeStep? CurrentStep { get; set; }
 
-  private bool DisablePrevious = true;
-  private bool DisableNext = false;
+  private bool _disablePrevious = true;
+  private bool _disableNext = false;
 
   protected override void OnParametersSet()
   {
@@ -128,8 +128,8 @@
   public void SetStep(int? stepOrder = 1)
   {
     CurrentStep = Recipe?.Steps.ElementAtOrDefault((stepOrder ?? 1) - 1);
-    DisablePrevious = CurrentStep?.Order == 1;
-    DisableNext = Recipe?.Steps.LastOrDefault()?.Order == CurrentStep?.Order;
+    _disablePrevious = CurrentStep?.Order == 1;
+    _disableNext = Recipe?.Steps.LastOrDefault()?.Order == CurrentStep?.Order;
   }
 
   public void PreviousStep()

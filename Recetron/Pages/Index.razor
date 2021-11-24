@@ -1,12 +1,12 @@
 @page "/"
 
-@inject Recetron.Interfaces.IToastService ToastService
+@inject Interfaces.IToastService _toastService
 
 <section class="rec-page rec-home-hero hero recbg-dark">
   <div class="hero-body text-light">
     <h1>Recetron</h1>
     <p>
-      Because I just need to learn some Blazor :) <br />
+      Because I just need to learn some Blazor :) <br/>
       Click on the buttons below :)
     </p>
   </div>
@@ -24,41 +24,45 @@
 
 
 @code {
+
   private void ShowCustom()
   {
-    ToastService.ShowCustom(
-      new Models.ToastContent
-      {
-        Title = "Custom content",
-        Content = "<span class=\"badge\">Notifications</ span >",
-        Duration = 6000,
-        IsHtml = true
-      }
-    ); ;
+    _toastService.ShowCustom(new Models.ToastContent("Custom content", "<span class=\"badge\">Notifications</ span >")
+    {
+      Duration = 6000,
+      IsHtml = true
+    });
+    ;
   }
+
   private void ShowSimple()
   {
-    ToastService.ShowSimple("Hey there :)", Enums.Toast.Warning);
+    _toastService.ShowSimple("Hey there :)", Enums.Toast.Warning);
   }
+
   private void ShowNormal()
   {
-    ToastService.ShowNormal("This is a normal toast", "Toast with not a lot of stuff");
+    _toastService.ShowNormal("This is a normal toast", "Toast with not a lot of stuff");
   }
+
   private void ShowPrimary()
   {
-    ToastService.ShowPrimary("This is a primary toast", "Toast with not a lot of stuff");
+    _toastService.ShowPrimary("This is a primary toast", "Toast with not a lot of stuff");
   }
+
   private void ShowSuccess()
   {
-    ToastService.ShowSuccess("This is a success toast", "Toast with not a lot of stuff");
+    _toastService.ShowSuccess("This is a success toast", "Toast with not a lot of stuff");
   }
+
   private void ShowWarning()
   {
-    ToastService.ShowWarning("This is a warning toast", "Toast with not a lot of stuff");
+    _toastService.ShowWarning("This is a warning toast", "Toast with not a lot of stuff");
   }
+
   private void ShowError()
   {
-    ToastService.ShowError("This is a error toast", "Toast with not a lot of stuff");
+    _toastService.ShowError("This is a error toast", "Toast with not a lot of stuff");
   }
 
 

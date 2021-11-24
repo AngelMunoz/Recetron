@@ -19,10 +19,8 @@ namespace Recetron.Services
     {
       OnShowToast?.Invoke(
         this,
-        new ToastContent
+        new ToastContent(title, content)
         {
-          Title = title,
-          Content = content,
           Kind = Toast.Error,
           Duration = duration
         }
@@ -33,10 +31,8 @@ namespace Recetron.Services
     {
       OnShowToast?.Invoke(
         this,
-        new ToastContent
+        new ToastContent(title, content)
         {
-          Title = title,
-          Content = content,
           Duration = duration
         }
       );
@@ -46,10 +42,8 @@ namespace Recetron.Services
     {
       OnShowToast?.Invoke(
         this,
-        new ToastContent
+        new ToastContent(title, content)
         {
-          Title = title,
-          Content = content,
           Kind = Toast.Primary,
           Duration = duration
         }
@@ -60,10 +54,8 @@ namespace Recetron.Services
     {
       OnShowToast?.Invoke(
         this,
-        new ToastContent
+        new ToastContent(title, content)
         {
-          Title = title,
-          Content = content,
           Kind = Toast.Success,
           Duration = duration
         }
@@ -74,9 +66,8 @@ namespace Recetron.Services
     {
       OnShowToast?.Invoke(
         this,
-        new ToastContent
+        new ToastContent(title, "")
         {
-          Title = title,
           Kind = kind
         }
       );
@@ -86,10 +77,8 @@ namespace Recetron.Services
     {
       OnShowToast?.Invoke(
         this,
-        new ToastContent
+        new ToastContent(title, content)
         {
-          Title = title,
-          Content = content,
           Kind = Toast.Warning,
           Duration = duration
         }

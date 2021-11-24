@@ -1,11 +1,11 @@
 ﻿@using Interfaces
 
-@inject IAuthService Auth
+@inject IAuthService _auth
 
 <header class="navbar recbg-light">
   <section class="navbar-section">
       @* Future use  *@
-      @if (Auth.IsAuthenticated) {
+      @if (_auth.IsAuthenticated) {
         <NavLink class="btn btn-link" href="/recipes">Recipes</NavLink>
         <NavLink class="btn btn-link" href="/notes">Notes</NavLink>
       }
@@ -14,7 +14,7 @@
     <NavLink class="btn btn-link" href="/">Receton</NavLink>
   </section>
   <section class="navbar-section">
-    @if (Auth.IsAuthenticated) {
+    @if (_auth.IsAuthenticated) {
       <button class="btn btn-link" @onclick="SignOut">Sign out</button>
     } else {
       <NavLink class="btn btn-link" href="auth">Register or Login</NavLink>
@@ -24,6 +24,6 @@
 @code {
   private async void SignOut(MouseEventArgs args)
   {
-    await Auth.LogoutAsync();
+    await _auth.LogoutAsync();
   }
 }

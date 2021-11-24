@@ -29,7 +29,7 @@ namespace Recetron.Api
          return Task.FromResult(false);
        }
 
-       var isAllowed = auth.VerifyJWT(token);
+       var isAllowed = auth.VerifyJwt(token);
        if (!isAllowed)
        {
          ctx.Response.StatusCode = 401;

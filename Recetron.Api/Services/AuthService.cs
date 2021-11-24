@@ -19,16 +19,21 @@ namespace Recetron.Api.Services
   {
     private readonly IMongoCollection<User> _users;
     private readonly IEnvVarService _envvars;
+
     public AuthService(IEnvVarService envvars, IDBService dbs)
     {
       _users = dbs.GetCollection<User>("users");
       _envvars = envvars;
     }
 
-    public async Task<UserDTO> SignupUserAsync(SignUpPayload payload, CancellationToken ct = default)
+    public async Task<UserDTO?> SignupUserAsync(SignUpPayload payload, CancellationToken ct = default)
     {
       var count = await _users.CountDocumentsAsync(user => user.Email!.Equals(payload.Email), null, ct);
-      if (count > 0) { throw new ArgumentException("User Already Exists"); }
+      if (count > 0)
+      {
+        throw new ArgumentException("User Already Exists");
+      }
+
       var password = BCryptNet.EnhancedHashPassword(payload.Password);
       var user = new User
       {
@@ -38,21 +43,20 @@ namespace Recetron.Api.Services
         Password = password
       };
       await _users.InsertOneAsync(user, null, ct);
-      var newUser = await _users.FindAsync(user => user.Email == payload.Email, null, ct);
-      var firstuser = newUser.FirstOrDefault(ct);
+      var firstuser = _users.Find(user => user.Email == payload.Email).FirstOrDefault(ct);
+      if (firstuser is null) return null;
       return new UserDTO
-      {
-        Email = firstuser.Email,
-        LastName = firstuser.LastName,
-        Name = firstuser.Name,
-        Id = firstuser.Id
-      };
+      (
+        firstuser.Id,
+        firstuser.Email,
+        firstuser.Name,
+        firstuser.LastName
+      );
     }
 
 
-    public bool VerifyJWT(string token)
+    public bool VerifyJwt(string token)
     {
-
       var tokenhandler = new JwtSecurityTokenHandler();
       var key = Encoding.UTF8.GetBytes(_envvars.GetJwtSecret());
       var parameters = new TokenValidationParameters
@@ -67,10 +71,22 @@ namespace Recetron.Api.Services
         tokenhandler.ValidateToken(token, parameters, out SecurityToken validated);
         return true;
       }
-      catch (ArgumentNullException) { return false; }
-      catch (ArgumentException) { return false; }
-      catch (SecurityTokenEncryptionFailedException) { return false; }
-      catch (SecurityTokenExpiredException) { return false; }
+      catch (ArgumentNullException)
+      {
+        return false;
+      }
+      catch (ArgumentException)
+      {
+        return false;
+      }
+      catch (SecurityTokenEncryptionFailedException)
+      {
+        return false;
+      }
+      catch (SecurityTokenExpiredException)
+      {
+        return false;
+      }
     }
 
     public string SignJwtToken(UserDTO user)
@@ -80,15 +96,16 @@ namespace Recetron.Api.Services
       var tokenDescriptor = new SecurityTokenDescriptor
       {
         Subject = new ClaimsIdentity(
-          new Claim[]
+          new[]
           {
-                    new Claim(ClaimTypes.Name, user.Id?.ToString()),
-                    new Claim(ClaimTypes.Email, user.Email),
-                    new Claim(ClaimTypes.NameIdentifier, user.Name?.ToString())
+            new Claim(ClaimTypes.Name, user.Id?.ToString()!),
+            new Claim(ClaimTypes.Email, user.Email!),
+            new Claim(ClaimTypes.NameIdentifier, user.Name?.ToString()!)
           }
         ),
         Expires = DateTime.UtcNow.AddDays(1),
-        SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+        SigningCredentials =
+          new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
       };
       var token = tokenHandler.CreateToken(tokenDescriptor);
       return tokenHandler.WriteToken(token);
@@ -102,18 +119,21 @@ namespace Recetron.Api.Services
       return (
         BCryptNet.EnhancedVerify(payload.Password, user.Password),
         new UserDTO
-        {
-          Email = user.Email,
-          LastName = user.LastName,
-          Name = user.Name,
-          Id = user.Id
-        }
+        (
+          user.Id,
+          user.Email,
+          user.Name,
+          user.LastName
+        )
       );
     }
 
-    public Task<UserDTO?> ExtractUserAsync(string? token)
+    public async Task<UserDTO?> ExtractUserAsync(string? token)
     {
-      if (token == null) { return Task.FromResult<UserDTO?>(null); }
+      if (token == null)
+      {
+        return null;
+      }
 
       var tokenhandler = new JwtSecurityTokenHandler();
       var key = Encoding.UTF8.GetBytes(_envvars.GetJwtSecret());
@@ -128,27 +148,33 @@ namespace Recetron.Api.Services
       {
         tokenhandler.ValidateToken(token, parameters, out SecurityToken validated);
         var tk = tokenhandler.ReadJwtToken(token);
-        var nameClaim = tk.Payload.Claims.FirstOrDefault(claim => claim.Type == "unique_name");
-        var filter = new FilterDefinitionBuilder<User>().Where(user => user.Id == nameClaim.Value);
-        return _users
-          .Find(filter)
-          .FirstOrDefaultAsync()
-          .ContinueWith(res =>
-          {
-            if (res.Result == null) { return null; };
-            return new UserDTO
-            {
-              Email = res.Result.Email,
-              LastName = res.Result.LastName,
-              Name = res.Result.Name,
-              Id = res.Result.Id
-            };
-          });
+        var nameClaim = tk.Payload.Claims.FirstOrDefault(claim => claim.Type == "name");
+        if (nameClaim is null) return null;
+        var found = await _users.Find(user => user.Id == nameClaim.Value).FirstAsync();
+
+        return new UserDTO(
+          found.Id,
+          found.Email,
+          found.Name,
+          found.LastName
+        );
       }
-      catch (ArgumentNullException) { return Task.FromResult<UserDTO?>(null); }
-      catch (ArgumentException) { return Task.FromResult<UserDTO?>(null); }
-      catch (SecurityTokenEncryptionFailedException) { return Task.FromResult<UserDTO?>(null); }
-      catch (SecurityTokenExpiredException) { return Task.FromResult<UserDTO?>(null); }
+      catch (ArgumentNullException)
+      {
+        return null;
+      }
+      catch (ArgumentException)
+      {
+        return null;
+      }
+      catch (SecurityTokenEncryptionFailedException)
+      {
+        return null;
+      }
+      catch (SecurityTokenExpiredException)
+      {
+        return null;
+      }
     }
   }
 }

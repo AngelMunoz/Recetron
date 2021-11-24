@@ -1,67 +1,57 @@
-﻿using Carter;
+﻿using System;
+using System.Threading.Tasks;
+using Carter;
 using Carter.ModelBinding;
 using Carter.Response;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
 using Recetron.Api.Interfaces;
 using Recetron.Core.Models;
 
 namespace Recetron.Api
 {
-
-  public class AuthModule : CarterModule
+  public class AuthModule : ICarterModule
   {
-    public AuthModule(IAuthService _auth) : base("/auth/")
+    private async Task<IResult> OnLogin(LoginPayload login, IAuthService auth)
     {
-      Post("login", async (req, res) =>
+      var (canLogin, user) = await auth.VerifyUserLoginAsync(login);
+      if (!canLogin || user is null)
+        return Results.BadRequest(new ErrorResponse("Credentials Not Valid"));
+
+      var token = auth.SignJwtToken(user);
+      return Results.Ok(new AuthResponse(token, user));
+    }
+
+    private async Task<IResult> OnSignUp(SignUpPayload payload, IAuthService _auth, HttpContext ctx)
+    {
+      var result = ctx.Request.Validate(payload);
+      if (!result.IsValid)
       {
-        var payload = await req.Bind<LoginPayload>();
+        return Results.BadRequest(new ErrorResponse("Failed Validation") { Errors = result.GetFormattedErrors() });
+      }
 
-
-        var (canLogin, user) = await _auth.VerifyUserLoginAsync(payload);
-        if (canLogin && user != null)
-        {
-          var token = _auth.SignJwtToken(user!);
-          await res.Negotiate(new AuthResponse() { Token = token, User = user });
-          return;
-        }
-        res.StatusCode = 400;
-        await res.Negotiate(new ErrorResponse { Message = "Credentials Not Valid" });
-      });
-
-      Post("signup", async (req, res) =>
+      try
       {
-        var result = await req.BindAndValidate<SignUpPayload>();
-        if (!result.ValidationResult.IsValid)
+        var user = await _auth.SignupUserAsync(payload);
+        if (user is null)
         {
-          res.StatusCode = 400;
-          await res.Negotiate(
-            new ErrorResponse
-            {
-              Message = "Failed Validation",
-              Errors = result.ValidationResult.GetFormattedErrors()
-            }
-          );
-          return;
-        }
-        try
-        {
-          var user = await _auth.SignupUserAsync(result.Data);
-          if (user == null)
-          {
-            res.StatusCode = 500;
-            await res.Negotiate(new ErrorResponse { Message = "Failed to signup user" });
-            return;
-          }
-          var token = _auth.SignJwtToken(user);
-          await res.Negotiate(new AuthResponse() { Token = token, User = user });
-        }
-        catch (System.ArgumentException e)
-        {
-          res.StatusCode = 400;
-          await res.Negotiate(new ErrorResponse { Message = e.Message });
+          return Results.UnprocessableEntity(new ErrorResponse("Failed to signup user"));
         }
 
-      });
+        var token = _auth.SignJwtToken(user);
+        return Results.Ok(new AuthResponse(token, user));
+      }
+      catch (System.ArgumentException e)
+      {
+        return Results.BadRequest(new ErrorResponse(e.Message));
+      }
+    }
+
+    public void AddRoutes(IEndpointRouteBuilder app)
+    {
+      app.MapPost("/auth/login", OnLogin).AllowAnonymous();
+      app.MapPost("/auth/signup", OnSignUp).AllowAnonymous();
     }
   }
 }

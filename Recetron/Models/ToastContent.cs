@@ -9,13 +9,18 @@ using System.Threading.Tasks;
 
 namespace Recetron.Models
 {
-  public class ToastContent
+  public record ToastContent
   {
-    public string Title { get; set; } = "";
-    public string Content { get; set; } = "";
-    public int Duration { get; set; } = 3500;
-    public Toast Kind { get; set; } = Toast.Normal;
-    public bool IsHtml { get; set; } = false;
+    public ToastContent(string title, string content)
+    {
+      Title = title;
+      Content = content;
+    }
+    public string Title { get; init; }
+    public string Content { get; init; }
+    public int Duration { get; init; } = 3500;
+    public Toast Kind { get; init; } = Toast.Normal;
+    public bool IsHtml { get; init; } = false;
 
     /// <summary>
     /// Kinda Hacky...

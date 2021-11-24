@@ -2,12 +2,12 @@
 @using Recetron.Interfaces;
 @using Recetron.Models;
 
-@inject IToastService ToastService
+@inject IToastService _toastService
 
 @implements IDisposable
 
 <div class="toast-container">
-  @foreach (var item in queue)
+  @foreach (var item in _queue)
   {
     if (item.IsShowing)
     {
@@ -29,19 +29,19 @@
 
 
 @code {
-  private Queue<ToastContent> queue = new Queue<ToastContent>();
+  private Queue<ToastContent> _queue = new Queue<ToastContent>();
   private System.Threading.CancellationTokenSource _cts = new System.Threading.CancellationTokenSource();
 
 
   protected override void OnInitialized()
   {
-    ToastService.OnShowToast += EnqueueToast;
-    ToastService.ClearAllToasts += ClearToasts;
+    _toastService.OnShowToast += EnqueueToast;
+    _toastService.ClearAllToasts += ClearToasts;
   }
 
-  private void EnqueueToast(object sender, ToastContent content)
+  private void EnqueueToast(object? sender, ToastContent content)
   {
-    queue.Enqueue(content);
+    _queue.Enqueue(content);
     StateHasChanged();
     try
     {
@@ -50,7 +50,7 @@
         try
         {
           await Task.Delay(content.Duration, _cts.Token);
-          queue.Dequeue();
+          _queue.Dequeue();
           StateHasChanged();
         }
         catch (TaskCanceledException e)
@@ -69,17 +69,17 @@
     }
   }
 
-  private void ClearToasts(object sender, object args)
+  private void ClearToasts(object? sender, object args)
   {
     _cts.Cancel();
-    queue.Clear();
+    _queue.Clear();
   }
 
   public void Dispose()
   {
-    ToastService.OnShowToast -= EnqueueToast;
-    ToastService.ClearAllToasts -= ClearToasts;
-    queue.Clear();
+    _toastService.OnShowToast -= EnqueueToast;
+    _toastService.ClearAllToasts -= ClearToasts;
+    _queue.Clear();
     try
     {
       _cts.Cancel();
