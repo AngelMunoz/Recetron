@@ -13,7 +13,8 @@ namespace Recetron.Api.Services
     public DBService()
     {
       var connstring = Environment.GetEnvironmentVariable("MONGO_URL") ?? "mongodb://192.168.100.5:27017/recetron";
-      _client = new MongoClient(connstring);
+      var settings = MongoClientSettings.FromConnectionString(connstring);
+      _client = new MongoClient(settings);
       _db = _client.GetDatabase("recetron");
     }
 
