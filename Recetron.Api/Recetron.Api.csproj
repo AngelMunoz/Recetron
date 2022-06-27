@@ -10,7 +10,7 @@
     <PackageReference Include="Carter" Version="6.0.0" />
     <PackageReference Include="FluentValidation" Version="11.0.1" />
     <PackageReference Include="MongoDB.Driver" Version="2.15.1" />
-    <PackageReference Include="MongoDB.Bson" Version="2.15.1" />
+    <PackageReference Include="MongoDB.Bson" Version="2.16.1" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.5" />
   </ItemGroup>
 
