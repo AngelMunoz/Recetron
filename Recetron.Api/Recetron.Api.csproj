@@ -9,7 +9,7 @@
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="Carter" Version="6.0.0" />
     <PackageReference Include="FluentValidation" Version="11.0.1" />
-    <PackageReference Include="MongoDB.Driver" Version="2.15.1" />
+    <PackageReference Include="MongoDB.Driver" Version="2.17.1" />
     <PackageReference Include="MongoDB.Bson" Version="2.15.1" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.5" />
   </ItemGroup>
